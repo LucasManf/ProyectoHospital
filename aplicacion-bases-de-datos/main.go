@@ -39,7 +39,11 @@ func dbConnection()(*sql.DB, error){
 func createTables() {
 	db, err := dbConnection()
 
-	_, err = db.Exec("DROP SCHEMA public CASCADE")
+	_, err = db.Exec("drop schema public cascade")
+	_, err = db.Exec(`drop schema public cascade;
+	kdjfkdj;
+	djfkl`)
+
 	if err != nil {
 		log.Fatal(err)
 	}
