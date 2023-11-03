@@ -1,0 +1,266 @@
+Trabajo Práctico
+
+Bases de Datos II − Segundo Cuatrimestre 2023
+
+1 Modelo de Datos
+A continuación se presenta el modelo de datos que se usa para almacenar la información
+relativa a la administración de turnos médicos.
+paciente(
+nro_paciente:int, --número de historia clínica
+nombre:text,
+apellido:text,
+dni_paciente:int;
+f_nac:date,
+nro_obra_social:int,
+nro_afiliade:int,
+domicilio:text,
+telefono:char(12),
+email:text -- válido
+)
+medique(
+dni_medique:int,
+nombre:text,
+apellido:text,
+especialidad:varchar(64),
+monto_consulta_privada:decimal(12,2), --para pacientes sin obra social
+telefono:char(12)
+)
+consultorio(
+nro_consultorio:int,
+nombre:text,
+domicilio:text,
+codigo_postal:char(8),
+telefono:char(12)
+)
+
+2
+
+agenda(
+dni_medique:int,
+dia:int, --1:lunes, 2:martes...
+nro_consultorio:int,
+hora_desde:time, --08:45, 11:30...
+hora_hasta:time,
+duracion_turno:interval
+)
+turno(
+nro_turno:int,
+fecha:timestamp,
+nro_consultorio:int,
+dni_medique:int,
+nro_paciente:int,
+nro_obra_social_consulta:int, --para las liquidaciones
+nro_afiliade_consulta:int,
+monto_paciente:decimal(12,2),
+monto_obra_social:decimal(12,2), --para las liquidaciones
+f_reserva:timestamp,
+estado:char(10) --`disponible',`reservado',`cancelado',`atendido',`liquidado'
+)
+reprogramacion(
+nro_turno:int,
+nombre_paciente:text,
+apellido_paciente:text,
+telefono_paciente:char(12),
+email_paciente:text,
+nombre_medique:text,
+apellido_medique:text,
+estado:char(12) --`pendiente', `reprogramado', `desistido'
+)
+error(
+nro_error:int,
+f_turno:timestamp,
+nro_consultorio:int,
+dni_medique:int,
+nro_paciente:int,
+operacion:char(12), --`reserva', `cancelación', `atención', `liquidación'
+f_error:timestamp,
+motivo:varchar(64)
+)
+
+3
+
+cobertura(
+dni_medique:int,
+nro_obra_social:int,
+monto_paciente:decimal(12,2), --monto a abonar por el paciente
+monto_obra_social:decimal(12,2) --monto a liquidar a la obra social
+)
+obra_social (
+nro_obra_social:int,
+nombre:text,
+contacto_nombre:text,
+contacto_apellido:text,
+contacto_telefono char(12),
+contacto_email:text,
+)
+liquidacion_cabecera(
+nro_liquidacion:int,
+nro_obra_social:int,
+desde:date,
+hasta:date,
+total:decimal(15,2)
+)
+liquidacion_detalle(
+nro_liquidacion:int,
+nro_linea:int,
+f_atencion:date,
+nro_afiliade:int,
+dni_paciente:int,
+nombre_paciente:text,
+apellido_paciente:text,
+dni_medique:int,
+nombre_medique:text,
+apellido_medique:text,
+especialidad:varchar(64),
+monto:decimal(12,2)
+)
+
+4
+
+envio_email(
+nro_email:int,
+f_generacion:timestamp,
+email_paciente:text,
+asunto:text,
+cuerpo:text,
+f_envio:timestamp,
+estado:char(10) --`pendiente', `enviado'
+)
+-- Esta tabla *no* es parte del modelo de datos, pero se incluye para
+-- poder probar las funciones.
+solicitud_reservas(
+nro_orden:int, --en qué orden se ejecutarán las reservas
+nro_paciente:int,
+dni_medique:int,
+fecha:date,
+hora:time
+)
+El sistema debe permitir asignar turnos, mantener toda la información de los pacientes,
+controlando que los turnos sean asignados correctamente—e.g. un mismo turno no puede
+ser reservado dos veces, el proceso de reserva de un turno no puede quedar a medio hacer,
+etc.
+Además se lleva un registro de les pacientes atendides en el mes, les cuales pueden tener
+distintas obras sociales. Es necesario poder administrar las liquidaciones mensuales de
+las atenciones, realizadas por cada médique. Puede haber pacientes que no posean obra
+social.
+2 Creación de la Base de Datos
+Se deberán crear las tablas respetando exactamente los nombres de tablas, atributos, y
+tipos de datos especificados.
+Se deberán agregar las PK's y FK's de todas las tablas, por separado de la creación de las
+tablas. Además, le usuarie deberá tener la posibilidad de borrar todas las PK's y FK's, si
+lo desea.
+3 Instancia de los Datos
+Se deberán cargar 20 pacientes y 20 médiques. Todes les médiques atenderán una obra
+social, excepto dos médiques que atenderán a dos obras sociales cada une. Por otro lado,
+les médiques tienen que tener distintas especialidades, por ejemplo, clínique, cardiología,
+ginecología, y osteopatía. Se pueden repetir las especialidades.
+
+5
+La tabla agenda deberá tener los días de atención para todes les médiques. Al menos tres
+médiques deberán atender dos días diferentes por semana.
+4 Stored Procedures y Triggers
+El trabajo práctico deberá incluir los siguientes stored procedures ó triggers:
+• generación de turnos disponibles: el trabajo práctico deberá contener la lógica
+que reciba como parámetros el año y el mes a generar, y que a partir de la agenda de
+todes les médiques guarde en las tablas que corresponda todos los turnos disponibles.
+El procedimiento deberá retornar true si se logra generar todos los turnos ó false
+en caso contrario. Esto último ocurrirá en caso de existir previamente algún turno
+generado para el mes y año solicitado.
+• reserva de turno: se deberá incluir la lógica que reciba los datos de la reserva—
+número de historia clínica, DNI de médique, fecha y hora—y que devuelva true si
+se logra reservar el turno ó false si se rechaza. El procedimiento deberá validar los
+siguientes elementos antes de confirmar la reserva:
+– Que el DNI de médique exista. En caso de que no cumpla, se debe cargar un error
+con el mensaje ?dni de médique no válido.
+– Que el número de historia clínica exista. En caso de que no cumpla, se debe cargar
+un error con el mensaje ?nro de historia clínica no válido.
+– Si le paciente tiene una obra social, que le médique trabaje con esa obra social. En
+caso de que no cumpla, se debe cargar un error con el mensaje ?obra social de
+paciente no atendida por le médique.
+– Que exista el turno de le médique para la fecha y la hora solicitadas, y que se
+encuentre disponible. En caso de que no cumpla, se debe cargar un error con el
+mensaje ?turno inexistente ó no disponible.
+– Que le paciente no haya llegado al límite de 5 turnos en estado reservado. En caso
+de que no cumpla, se debe cargar un error con el mensaje ?supera límite de
+reserva de turnos.
+Si se aprueba la reserva, se deberá actualizar la fila correspondiente en la tabla turno
+con los datos de le paciente y los montos de la consulta a abonar por elle y por la obra
+social, marcando el estado como reservado.
+• cancelación de turnos: se deberá proveer la lógica que permita cancelar todos los
+turnos disponibles ó reservados que tenga une médique para un rango de fechas. El
+procedimiento debe recibir el DNI de médique, las fechas desde y hasta, y retornará la
+cantidad de turnos cancelados. Además de actualizar el estado de los turnos, se deberá
+agregar la información de los turnos cancelados en la tabla reprogramacion, a fin de
+que el Centro de Atención a le Usuarie pueda contactarse con les pacientes.
+
+6
+• atención de turno: se deberá incluir la lógica que reciba un número de turno, y lo
+marque como atendido. Retornará true si la operación se realiza satisfactoriamente
+ó false en caso contrario. El procedimiento deberá validar los siguientes elementos,
+antes de marcar el turno como atendido:
+– Que el número de turno exista. En caso de que no cumpla, se debe cargar un error
+con el mensaje ?nro de turno no válido.
+– Que el turno se encuentre en estado reservado. En caso de que no cumpla, se debe
+cargar un error con el mensaje ?turno no reservado.
+– Que la fecha del turno se corresponda con la fecha actual, sin importar la hora.
+En caso de que no cumpla, se debe cargar un error con el mensaje ?turno no
+corresponde a la fecha del día.
+• liquidación para obras sociales: Mensualmente se debe generar una liquidación
+por obra social, informando el monto total que será percibido por la atención de
+les afiliades, junto con el detalle de todas las atenciones. Sólo serán abonados les
+pacientes que concurrieron a la consulta. Los turnos incluidos en la liquidación deben
+ser marcados como liquidados.
+
+• envio de emails a pacientes: el trabajo práctico deberá proveer la funcionali-
+dad de generar emails para ser enviados a la dirección de le paciente—en la tabla
+
+envio_emails—cuando sucedan las siguientes novedades:
+
+– Cada vez que se haga efectiva la reserva de un turno, se debe ingresar automáti-
+camente un email con el asunto ‘Reserva de turno’, e indicando en el cuerpo del
+
+email los datos del turno reservado y de le médique.
+– Cada vez que un turno sea cancelado, se debe ingresar automáticamente un email
+con el asunto ‘Cancelación de turno’, e indicando en el cuerpo del email los datos
+del turno cancelado y de le médique.
+– Una vez al día, se debe generar un email para les pacientes que tengan un turno
+reservado para dos días después de la fecha actual, con el asunto ‘Recordatorio
+de turno’, e indicando en el cuerpo del email los datos del próximo turno y de le
+médique.
+
+– Al finalizar el día, se debe generar un email para les pacientes que no hayan con-
+currido a su turno reservado, con el asunto ‘Pérdida de turno reservado’, e
+
+indicando en el cuerpo del email los datos del turno no utilizado y de le médique.
+Se deberá crear una tabla con pedidos de reserva de turnos para probar el sistema, la que
+deberá contener los atributos: nro_orden, nro_paciente, dni_medique, fecha, hora. Y
+se deberá hacer un procedimiento de testeo, que solicite la reserva de estos turnos.
+Todo el código SQL escrito para este trabajo práctico, deberá poder ejecutarse
+desde una aplicación CLI escrita en Go.
+
+7
+
+5 JSON y Bases de datos NoSQL
+Por último, para poder comparar el modelo relacional con un modelo no relacional NoSQL,
+se pide guardar los datos de pacientes, médiques, consultorios, obras sociales, y turnos
+(tres por cada médique) en una base de datos NoSQL basada en JSON. Para ello, utilizar
+la base de datos BoltDB. Este código, también deberá ejecutarse desde una aplicación
+CLI escrita en Go.
+6 Condiciones de Entrega
+• El trabajo es grupal, en grupos de, exactamente, 4 integrantes. Se debe realizar en un
+
+repositorio privado git, hosteado en Gitlab con el apellido de les cuatro integran-
+tes, separados con guiones, seguidos del string ‘-db2-uces’ como nombre del proyecto,
+
+e.g. barco-maradona-palermo-riquelme-db2-uces. Agregar al docente de la mate-
+ria, el username de Gitlab hdr en el repo como owner.
+
+• La fecha de entrega máxima es el 17 de noviembre de 2023 a las 1900hs, con una
+defensa presencial del trabajo práctico por cada grupo, en la cual el docente de la
+materia va a mirar lo que se encuentre en el repo git hasta ese momento, y hacer
+distintas preguntas.
+• El informe del trabajo práctico se debe presentar en formato Asciidoc. Para ello,
+cuentan con una guía en hdr.gitlab.io/adoc.
+Observación: En este trabajo práctico van a tener que investigar por su cuenta cómo se
+hacen algunas en PostgreSQL. No busquen en Stack Overflow ó sitios similares,
+para eso tienen la documentación oficial de PostgreSQL.
