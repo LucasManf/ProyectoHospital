@@ -45,7 +45,7 @@ func createTables() {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec("create SCHEMA publc")
+	_, err = db.Exec("create SCHEMA public")
 
 	if err != nil {
 		log.Fatal(err)
