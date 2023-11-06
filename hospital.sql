@@ -140,6 +140,32 @@ alter table liquidacion_cabecera add constraint liquidacion_cabecera_pk primary 
 alter table liquidacion_detalle add constraint liquidacion_detalle_pk primary key (nro_liquidacion, nro_linea);
 alter table envio_email add constraint envio_emailpk primary key (nro_email);
 
+--FK :
+-- en la tabla agenda: dni_meqique fk con dni_medique de la tabla medique
+-- nro_consultorio fk con nro_consultorio de la tabla consultorio
+
+-- en la tabla turno: dni_medique fk con dni_medique en la tabla medique
+-- nro_consultorio fk con nro_consultorio de la tabla consultorio
+-- nro_paciente fk con nro_paciente de la tabla paciente
+-- nro_obra_social_consulta fk con nro_obra_social de la tabla cobertura y nro_obra_social de la tabla obra_social ??
+-- nro_afiliade_consulta fk con nro_afiliade de la tabla paciente
+
+-- en la tabla reprogramacion: nro_turno fk con nro_turno de la tabla turno
+
+-- en la tabla error: dni_medique fk con dni_medique de la tabla medique
+-- nro_consultorio fk con nro_consultorio de la tabla consultorio
+-- nro_paciente fk con nro_paciente de la tabla paciente
+
+-- en la tabla cobertura: dni_medique fk con dni_medique de la tabla medique
+-- nro_obra_social fk con nro_obra_social de la tabla obra_social
+
+
+-- en la tabla liquidacion_cabecera: nro_obra_social fk con nro_obra_social de la tabla obra_social
+
+-- en la tabla liquidacion_detalle: nro_liquidacion fk con nro_liquidacion de la tabla liquidacion_cabecera
+-- nro_afiliade fk con nro_afiliade de la tabla paciente
+-- dni_paciente fk con dni_paciente de la tabla paciente
+-- dni_medique fk con dni_medique de la tabla medique
 
 
 
