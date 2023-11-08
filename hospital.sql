@@ -4,7 +4,7 @@ create database hospital;
 /c hospital
 
 create table paciente(
-	nro_paciente int,
+	nro_paciente int, --numero de historia clinica
 	nombre  text,
 	apellido text,
 	dni_paciente int,
@@ -13,7 +13,7 @@ create table paciente(
 	nro_afiliade int,
 	domicilio text,
 	telefono char(12),
-	email text
+	email text --valido
 );
 
 create table medique(
@@ -21,7 +21,7 @@ create table medique(
 	nombre text,
 	apellido text,
 	especialidad varchar(64),
-	monto_consulta_privada decimal(12, 2),
+	monto_consulta_privada decimal(12, 2), --para pacientes sin obra social
 	telefono char(12)
 );
 
@@ -34,11 +34,20 @@ create table consultorio(
 
 create table agenda(
 	dni_medique int,
-	dia int,
+	dia int, --lunes:1, martes:2, etc.
 	nro_consultorio int,
+	hora_desde time, -- 08:30,11:45, etc.
+	hora_hasta time,
+	duracion_turno interval
+);	
+	
+create table turno(	
+	nro_turno int,
+	fecha timestamp,
+	nro_consultorio,
 	dni_medique int,
 	nro_paciente int,
-	nro_obra_social int,
+	nro_obra_social_consulta int, --para las liquidaciones
 	nro_afiliade_consulta int,
 	monto_paciente decimal(12,2),
 	monto_obra_social decimal(12,2), --para las liquidaciones
@@ -130,7 +139,7 @@ create table solicitud_reservas(
 alter table paciente add constraint paciente_pk primary key(nro_paciente);
 alter table medique add constraint medique_pk primary key (dni_medique);
 alter table consultorio add constraint consultorio_pk primary key (nro_consultorio);
-alter table agenda add constraint agenda_pk primary key (dni_medique, dni);
+alter table agenda add constraint agenda_pk primary key (dni_medique, dia);
 alter table turno add constraint turno_pk primary key (nro_turno);
 alter table reprogramacion add constraint reprogramacion_pk primary key (nro_turno);
 alter table error add constraint error_pk primary key (nro_error);
