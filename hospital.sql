@@ -195,7 +195,7 @@ insert into paciente values (10, 'Lucía', 'Fernández', 45678901, '1995-04-04',
 insert into paciente values (11, 'Jorge', 'Gómez', 56789012, '2000-05-05', 5678, 9012, 'Calle Falsa 567, Florida', '0115678-9012', 'jorgegomez@example.com');
 insert into paciente values (12, 'Ana', 'Díaz', 67890123, '2005-06-06', 6789, 1234, 'Calle Falsa 678, Villa Crespo', '0116789-1234', 'anadiaz@example.com');
 insert into paciente values (13, 'Diego', 'Martínez', 78901234, '2010-07-07', 7890, 2345, 'Calle Falsa 789, Caballito', '0117890-2345', 'diegomartinez@example.com');
-insert into paciente values (14, 'Carla', 'Pérez', 89012345, '2015-08-08', 8901, 3456, 'Calle Falsa 890, Belgrano', '0118901-3456', 'carlaperez@example.com'));
+insert into paciente values (14, 'Carla', 'Pérez', 89012345, '2015-08-08', 8901, 3456, 'Calle Falsa 890, Belgrano', '0118901-3456', 'carlaperez@example.com');
 insert into paciente values (15, 'Lucas', 'González', 90123456, '2020-09-09', 9012, 4567, 'Calle Falsa 901, Palermo', '0119012-4567', 'lucasgonzalez@example.com');
 insert into paciente values (16, 'Sofía', 'Rodríguez', 12345679, '1980-05-10', 1236, 5778, 'Calle Falsa 1341, Pinamar', '0111234-4312', 'sofiarodriguez@example.com');
 insert into paciente values (17, 'Carlos', 'Bianchi', 2543765, '1949-04-26', 1700, 17000, 'Campeones 2000, La Boca', '0114637-7584', 'virrey@hotmail.com');
