@@ -1,7 +1,7 @@
 drop database if exists hospital;
 create database hospital;
 
-/c hospital
+\c hospital
 
 create table paciente(
 	nro_paciente int, --numero de historia clinica
@@ -44,7 +44,7 @@ create table agenda(
 create table turno(	
 	nro_turno int,
 	fecha timestamp,
-	nro_consultorio,
+	nro_consultorio int,
 	dni_medique int,
 	nro_paciente int,
 	nro_obra_social_consulta int, --para las liquidaciones
@@ -75,7 +75,7 @@ create table error(
 	operacion char(12), --`reserva', `cancelación', `atención', `liquidación'
 	f_error timestamp,
 	motivo varchar(64)
-):
+);
 
 create table cobertura(
 	dni_medique int,
@@ -136,6 +136,7 @@ create table solicitud_reservas(
 	hora time
 );
 
+--Primary Keys
 alter table paciente add constraint paciente_pk primary key(nro_paciente);
 alter table medique add constraint medique_pk primary key (dni_medique);
 alter table consultorio add constraint consultorio_pk primary key (nro_consultorio);
@@ -159,8 +160,8 @@ alter table agenda add constraint fk_agenda2 foreign key (nro_consultorio) refer
 alter table turno add constraint fk_turno foreign key (dni_medique) references medique(dni_medique);
 alter table turno add constraint fk_turno2 foreign key (nro_consultorio) references consultorio(nro_consultorio);
 alter table turno add constraint fk_turno3 foreign key (nro_paciente) references paciente(nro_paciente);
-alter table turno add constraint fk_turno4 foreign key (nro_obra_social) references obra_social(nro_obra_social);
-alter table turno add constraint fk_turno5 foreign key (nro_afiliade_consulta) references paciente(nro_afiliade);
+alter table turno add constraint fk_turno4 foreign key (nro_obra_social_consulta) references obra_social(nro_obra_social);
+--alter table turno add constraint fk_turno5 foreign key (nro_afiliade_consulta) references paciente(nro_afiliade);
 
 alter table reprogramacion add constraint fk_reprogramacion foreign key (nro_turno) references turno(nro_turno);
 
@@ -174,44 +175,6 @@ alter table cobertura add constraint fk_cobertura2 foreign key (nro_obra_social)
 alter table liquidacion_cabecera add constraint fk_liq_cab foreign key (nro_obra_social) references obra_social(nro_obra_social);
 
 alter table liquidacion_detalle add constraint fk_liq_det foreign key (nro_liquidacion) references liquidacion_cabecera(nro_liquidacion);
-alter table liquidacion_detalle add constraint fk_liq_det2 foreign key (nro_afiliade) references paciente(nro_afiliade);
-alter table liquidacion_detalle add constraint fk_liq_det3 foreign key (dni_paciente) references paciente(dni_paciente);
-alter table liquidacion_detalle add constraint fk_liq_det4 foreign key (dni_medique) references medique(dni_medique);
-
-
---FK :
--- en la tabla agenda: dni_meqique fk con dni_medique de la tabla medique
--- nro_consultorio fk con nro_consultorio de la tabla consultorio
-
--- en la tabla turno: dni_medique fk con dni_medique en la tabla medique
--- nro_consultorio fk con nro_consultorio de la tabla consultorio
--- nro_paciente fk con nro_paciente de la tabla paciente
--- nro_obra_social_consulta fk con nro_obra_social de la tabla cobertura y nro_obra_social de la tabla obra_social ??
--- nro_afiliade_consulta fk con nro_afiliade de la tabla paciente
-
--- en la tabla reprogramacion: nro_turno fk con nro_turno de la tabla turno
-
--- en la tabla error: dni_medique fk con dni_medique de la tabla medique
--- nro_consultorio fk con nro_consultorio de la tabla consultorio
--- nro_paciente fk con nro_paciente de la tabla paciente
-
--- en la tabla cobertura: dni_medique fk con dni_medique de la tabla medique
--- nro_obra_social fk con nro_obra_social de la tabla obra_social
-
-
--- en la tabla liquidacion_cabecera: nro_obra_social fk con nro_obra_social de la tabla obra_social
-
--- en la tabla liquidacion_detalle: nro_liquidacion fk con nro_liquidacion de la tabla liquidacion_cabecera
--- nro_afiliade fk con nro_afiliade de la tabla paciente
--- dni_paciente fk con dni_paciente de la tabla paciente
--- dni_medique fk con dni_medique de la tabla medique
-
-
-
-
-
-
-
-
-
-
+alter table liquidacion_detalle add constraint fk_liq_det2 foreign key (dni_medique) references medique(dni_medique);
+--alter table liquidacion_detalle add constraint fk_liq_det3 foreign key (nro_afiliade) references paciente(nro_afiliade);
+--alter table liquidacion_detalle add constraint fk_liq_det4 foreign key (dni_paciente) references paciente(dni_paciente);
