@@ -3,6 +3,8 @@ create database hospital;
 
 \c hospital
 
+--creación tablas
+
 create table paciente(
 	nro_paciente int, --numero de historia clinica
 	nombre  text,
@@ -178,3 +180,27 @@ alter table liquidacion_detalle add constraint fk_liq_det foreign key (nro_liqui
 alter table liquidacion_detalle add constraint fk_liq_det2 foreign key (dni_medique) references medique(dni_medique);
 --alter table liquidacion_detalle add constraint fk_liq_det3 foreign key (nro_afiliade) references paciente(nro_afiliade);
 --alter table liquidacion_detalle add constraint fk_liq_det4 foreign key (dni_paciente) references paciente(dni_paciente);
+
+--Ingreso 20 pacientes
+insert into paciente values (1, 'Martin', 'Galvarini', 42660991, '30-06-2000', 100, 1000, 'Carlos Pellegrini 2436, Martinez', '0114416-3214', '13.martingalva@gmail.com');
+insert into paciente values (2, 'Pascual', 'Galvarini', 60123321, '15-01-2015', 200, 2000, 'Carlos Pellegrini 2436, Martinez', '0113395-2194', 'pascualgalva@gmail.com');
+insert into paciente values (3, 'Lucas', 'Manfredi', 43021777, '02-11-2000', 300, 3000, 'Domingo de Acassuso 150, La Lucila' , '0117483-2745', 'luquita@gmail.com');
+insert into paciente values (4, 'Juan Ignacio', 'Mussino', 41345123, '23-07-1999', 400, 4000, 'Centenario 100, San Isidro', '0115467-1234', 'juanimu@aol.com');
+insert into paciente values (5, 'Lorenzo', 'Paparo', 44736192, '20-04-2001', 500, 5000, 'Calle Cerrada 500, Villa Adelina', '0118432-8326', 'lorepapa@yahoo.com');
+insert into paciente values (6, 'Gianluca', 'Zeolla', 46932721, '19-10-2004', 600, 6000, 'Calle Lejana 1500, Muy muy lejano, 0115674-2341', 'gianze@live.com');
+insert into paciente values (7, 'Juan', 'Pérez', 12345678, '1980-01-01', 1234, 5678, 'Calle Falsa 123, Victoria', '011-1234-5678', 'juanperez@example.com');
+insert into paciente values (8, 'María', 'González', 23456789, '1985-02-02', 2345, 6789, 'Calle Falsa 234, La Matanza', '0112345-6789', 'mariagonzalez@example.com');
+insert into paciente values (9, 'Pedro', 'Rodríguez', 34567890, '1990-03-03', 3456, 7890, 'Calle Falsa 345, Tigre', '0113456-7890', 'pedrorodriguez@example.com');
+insert into paciente values (10, 'Lucía', 'Fernández', 45678901, '1995-04-04', 4567, 8901, 'Calle Falsa 456, Olivos', '0114567-8901', 'luciafernandez@example.com');
+insert into paciente values (11, 'Jorge', 'Gómez', 56789012, '2000-05-05', 5678, 9012, 'Calle Falsa 567, Florida', '0115678-9012', 'jorgegomez@example.com');
+insert into paciente values (12, 'Ana', 'Díaz', 67890123, '2005-06-06', 6789, 1234, 'Calle Falsa 678, Villa Crespo', '0116789-1234', 'anadiaz@example.com');
+insert into paciente values (13, 'Diego', 'Martínez', 78901234, '2010-07-07', 7890, 2345, 'Calle Falsa 789, Caballito', '0117890-2345', 'diegomartinez@example.com');
+insert into paciente values (14, 'Carla', 'Pérez', 89012345, '2015-08-08', 8901, 3456, 'Calle Falsa 890, Belgrano', '0118901-3456', 'carlaperez@example.com'));
+insert into paciente values (15, 'Lucas', 'González', 90123456, '2020-09-09', 9012, 4567, 'Calle Falsa 901, Palermo', '0119012-4567', 'lucasgonzalez@example.com');
+insert into paciente values (16, 'Sofía', 'Rodríguez', 12345679, '1980-05-10', 1236, 5778, 'Calle Falsa 1341, Pinamar', '0111234-4312', 'sofiarodriguez@example.com');
+insert into paciente values (17, 'Carlos', 'Bianchi', 2543765, '1949-04-26', 1700, 17000, 'Campeones 2000, La Boca', '0114637-7584', 'virrey@hotmail.com');
+insert into paciente values (18, 'Manuel', 'Belgrano', 1, '1778-08-15', 1800, 18000, 'Santa Fe 1812, Rosario', '0114531-1234', 'manubel@gmail.com');
+insert into paciente values (19);
+insert into paciente values (20);
+	
+--Ingreso 20 mediques	
