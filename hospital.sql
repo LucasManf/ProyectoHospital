@@ -200,7 +200,7 @@ insert into paciente values (15, 'Lucas', 'González', 90123456, '2020-09-09', 9
 insert into paciente values (16, 'Sofía', 'Rodríguez', 12345679, '1980-05-10', 1236, 5778, 'Calle Falsa 1341, Pinamar', '0111234-4312', 'sofiarodriguez@example.com');
 insert into paciente values (17, 'Carlos', 'Bianchi', 2543765, '1949-04-26', 1700, 17000, 'Campeones 2000, La Boca', '0114637-7584', 'virrey@hotmail.com');
 insert into paciente values (18, 'Manuel', 'Belgrano', 1, '1778-08-15', 1800, 18000, 'Santa Fe 1812, Rosario', '0114531-1234', 'manubel@gmail.com');
-insert into paciente values (19);
-insert into paciente values (20);
+insert into paciente values (19, 'Lionel', 'Messi', 35094577, '1987-06-24', 10, 10, 'La Pampa 2133, Belgrano', '0114126-7789', 'lio.d10s@yopmail.com');
+insert into paciente values (20, 'Carlos Saul', 'Menem', 11365578, '1930-07-02', 420, 1312, 'Dos Metros Bajo Tierra, La Rioja', '0119012-1243', 'charly.menem10@outlook.com');
 	
 --Ingreso 20 mediques	
