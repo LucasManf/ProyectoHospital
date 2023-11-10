@@ -29,6 +29,7 @@ create table medique(
 
 create table consultorio(
 	nro_consultorio int,
+	nombre text,
 	domicilio text,
 	codigo_postal char(8),
 	telefono char(12)
@@ -180,6 +181,20 @@ alter table liquidacion_detalle add constraint fk_liq_det foreign key (nro_liqui
 alter table liquidacion_detalle add constraint fk_liq_det2 foreign key (dni_medique) references medique(dni_medique);
 --alter table liquidacion_detalle add constraint fk_liq_det3 foreign key (nro_afiliade) references paciente(nro_afiliade);
 --alter table liquidacion_detalle add constraint fk_liq_det4 foreign key (dni_paciente) references paciente(dni_paciente);
+
+--Ingreso consultorios
+insert into consultorio (nro_consultorio, nombre, domicilio, codigo_postal, telefono)
+values
+(1, 'Rene Favaloro', 'Fleming 2000', '1640', '11-5431-2311'),
+(2, 'Alexander Fleminf', 'Fleming 2020', '1640', '11-5411-2341'),
+(3, 'Edward Jenner', 'Fleming 2050', '1640', '11-5411-2351'),
+(4, 'William Osler', 'Fleming 2080', '1640', '11-5411-4311'),
+(5, 'Louis Pasteur', 'Fleming 2100', '1640', '11-5411-1234'),
+(6, 'Sigmund Freud', 'Andres Rolon 10', '1642', '11-5412-1235'),
+(7, 'Elizabeth Blackwell', 'Andres Rolon 40', '1642', '11-4311-4212'),
+(8, 'Joseph Lister', 'Andres Rolon 70', '1642','11-4312-1215'),
+(9, 'John Snow', 'Andres Rolon 130', '1642', '11-4431-4212'),
+(10, 'Hipocrates','Andres Rolon 162','1642','11-4312-1123');
 
 --Ingreso de obras sociales
 insert into obra_social (nro_obra_social, nombre, contacto_nombre, contacto_apellido, contacto_telefono, contacto_email) 
