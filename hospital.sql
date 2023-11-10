@@ -252,7 +252,35 @@ values
 (14353515, 'Dra. Ana', 'Mendez', 'Oftalmología', 20000.00, '0118738-4567'),
 (12459135, 'Dra. Alberto', 'Fuentes', 'Pediatría', 16000.00, '0119374-8901');
 
--- sotre procedure
+--Agendas
+
+insert into agenda (dni_medique, dia, nro_consultorio, hora_desde, hora_hasta, duracion_turno)
+values
+(10456789,1,1,'8:00','16:00','8 hour'),
+(40342233,2,2),
+(56565656,3,3),
+(11442233,4,4),
+(23959693,5,5),
+(30506070,6,6),
+(12094587,7,7),
+(23233412,1,8),
+(11990922,2,9),
+(99349349,3,10),
+(87654321,4,1),
+(11122334,5,2),
+(23545427,6,3),
+(47351623,7,4),
+(41553273,1,5),
+(35213523,2,6),
+(23125673,3,7),
+(12536732,4,8),
+(14353515,5,9),
+(12459135,6,10),
+(10456789,2,1),
+(40342233,3,2),
+(56565656,4,3);
+
+-- stored procedure
 /*create or replace function generar_turnos_disponibles(anio int, mes int) returns boolean as $$
 declare
 medico record;
