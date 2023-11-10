@@ -251,3 +251,20 @@ values
 (12536732, 'Dr. Gonzalo', 'Luna', 'Neurología', 18000.00, '0118743-0123'),
 (14353515, 'Dra. Ana', 'Mendez', 'Oftalmología', 20000.00, '0118738-4567'),
 (12459135, 'Dra. Alberto', 'Fuentes', 'Pediatría', 16000.00, '0119374-8901');
+
+-- sotre procedure
+/*create or replace function generar_turnos_disponibles(anio int, mes int) returns boolean as $$
+declare
+medico record;
+turno_id int;
+
+begin
+	perform 1 from turno where extract(year from fecha) = anio and extract(month from fecha) = mes limit 1;
+	if found then
+		raise notice 'ya existen turnos'
+		return false;
+	end if;
+
+-- generar turnos disponibles
+
+for medico in select dni_medique, nro_consultorio, hora_desde, hora_hasta, duracion_turno from agenda*/
