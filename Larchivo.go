@@ -235,17 +235,161 @@ func createTables() {
 	defer db.Close()
 }
 
+// comienzo funcion generacion de turnos
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"time"
+
+	_ "github.com/lib/pq"
 
 
+)
+
+func main() { 
+
+	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
+	if err != nil { 
+
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 
+	turnoGenerado := generarTurnosDisponibles(2023, 11)
+	
+	if turnoGenerado { 
+
+		fmt.Println("Turno generado exitosamente")
+	} else { 
+
+		fmt.Println("Error al generar turno, ya existe turno para el mes y el año solicitado")
+
+	}
+}
+
+func generarTurnosDisponibles(year, month int) bool {
 
 
+	if turnosYaGenerados(year, month) { 
+
+		return false
+	}
+
+	
+
+}
 
 
+// fin funcion generacion de turnos
 
+// comienzo funcion reserva de turno
+package main
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"time"
+)
 
+func main() {
+	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
+	//cuando pide nro de historia clinica se refiere al nro del paciente
+	reservaExitosa:= reservarTurno(nro_paciente, dni_medique, fecha, hora)
+	if reservaExitosa {
+		fmt.Println("Se ha reservado el turno")
+	} else {
+		fmt.Println("Error al reservar el turno")
+	}
+}
 
+func reservarTurno(nro_paciente int, dni_medique int, fecha date, hora time) bool {
 
+     if !verificarDNIMedique(dni_medique) { 
+     mostrarError()
+	 return false
+	 }
+
+     if!verificarNroHistoriaClinica(nro_paciente) { 
+     mostrarError()
+	 return false
+	 }
+
+	 obraSocialPaciente, err := obtenerObraSocialPaciente(nro_paciente)
+	 if err != nil { 
+     log.Fatal(err)
+	 }
+
+     if !verificarObraSocial(dni_medique, obraSocialPaciente) { 
+     mostrarError()
+	 }
+
+	 if !verificarDisponibilidadTurno(dni_medique, fecha, hora) { 
+     mostrarError()
+	 return false
+	 }
+
+	 if !verificarLimiteReservas(nro_paciente) { 
+     mostrarError()
+	 return false
+	 }
+
+	 if !realizarReservaTurno(nro_paciente, dni_medique, fecha, hora) { 
+     mostrarError()
+	 return false
+	 }
+
+return false
+
+}
+
+//funciones
+func verificarDNIMedique(dni_medique int) bool { 
+
+	return true
+} 
+
+func verificarNroHistoriaClinica(nro_paciente int) bool { 
+
+		return true
+}
+
+func obtenerObraSocialPaciente(nro_paciente int) (int, error) { 
+return 1, nil
+}
+
+func verificarObrSocial(dni_medique, obraSocialPaciente int) bool { 
+
+	return true
+}
+
+func verificarDisponibilidadTurno(dni_medique int,  fecha, hora) bool { 
+
+	return true
+}
+
+func verificarLimiteReservas(nro_paciente int) bool { 
+
+	return true
+}
+
+func realizarReservaTurno(nro_paciente, dni_medique int, fecha, hora) bool { 
+
+	return true
+}
+
+func mostrarError() { 
+
+	fmt.Println("Error durante la operacion")
+}
+
+//fin de funcion reserva turno
 
