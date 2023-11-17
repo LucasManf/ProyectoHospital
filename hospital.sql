@@ -211,7 +211,7 @@ insert into paciente values (1, 'Martin', 'Galvarini', 42660991, '2000-06-30', 1
 insert into paciente values (2, 'Pascual', 'Galvarini', 60123321, '2015-01-15', 2, 2000, 'Carlos Pellegrini 2436, Martinez', '0113395-2194', 'pascualgalva@gmail.com');
 insert into paciente values (3, 'Lucas', 'Manfredi', 43021777, '2000-11-02', 3, 3000, 'Domingo de Acassuso 150, La Lucila' , '0117483-2745', 'luquita@gmail.com');
 insert into paciente values (4, 'Juan Ignacio', 'Mussino', 41345123, '1999-07-23', 4, 4000, 'Centenario 100, San Isidro', '0115467-1234', 'juanimu@aol.com');
-insert into paciente values (5, 'Lorenzo', 'Paparo', 44736192, '2001-04-10', 5, 5000, 'Calle Cerrada 500, Villa Adelina', '0118432-8326', 'lorepapa@yahoo.com');
+insert into paciente values (5, 'Lorenzo', 'Paparo', 44736192, '2004-04-10', 5, 5000, 'Calle Cerrada 500, Villa Adelina', '0118432-8326', 'lorepapa@yahoo.com');
 insert into paciente values (6, 'Gianluca', 'Zeolla', 46932721, '2004-10-19', 6, 6000, 'Calle Lejana 1500, Muy muy lejano', '0115674-2341', 'gianze@live.com');
 insert into paciente values (7, 'Juan', 'Pérez', 12345678, '1980-01-01', 1, 5678, 'Calle Falsa 123, Victoria', '0111234-5678', 'juanperez@example.com');
 insert into paciente values (8, 'María', 'González', 23456789, '1985-02-02', 2, 6789, 'Calle Falsa 234, La Matanza', '0112345-6789', 'mariagonzalez@example.com');
