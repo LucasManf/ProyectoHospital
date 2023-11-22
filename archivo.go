@@ -458,21 +458,20 @@ func cancelarTurno() {
 			cantidad_turnos_cancelados int;
 		
 		begin
-			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique m, into reprog 
+			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique m into reprog 
 			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado';
 
 			update turno
 			set estado = 'CANCELADO' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			
 			if found then
-				insert into reprogramacion values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente')
+				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono, reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente');
 				cantidad_turnos_cancelados := ROW_COUNT;
 			end if;
 		
 			return cantidad_turnos_cancelados;
 		end;
 		$$ language plpgsql;
-
 	`)
 }
 
