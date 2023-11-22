@@ -528,8 +528,57 @@ func atencionTurno() {
 }
 
 
+func emailsSP() {
+	
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+	
+		create or replace function email_recordatorio() returns void as $$
+		declare
+			datos_turno record;
+			cuerpo_email text;
+			fecha_email date := current_date = interval '2 days';
+			
+		begin
+			select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email into datos_turno;
+			cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+			
+			insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+			values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
+		end;
+		$$ language plpgsql;
+	
+------------------------------------------------------------------------
+	
+	
+		create or replace function email_perdida_turno() returns void as $$
+			declare
+				datos_turno record;
+				cuerpo_email text;
+				
+			begin
+				select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha <= now() into datos_turno;
+				cuerpo_email := 'Perdiste tu turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+				
+				insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+				values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
+			end;
+			$$ language plpgsql;
+		
+	`)	
+}
+
+
 //Triggers
-func emails(emailPaciente string, asunto string, body string) {
+func emailsTrigger() {
 
 	db, err := dbConnection()
 	if err != nil {
@@ -583,29 +632,9 @@ func emails(emailPaciente string, asunto string, body string) {
 	for each row
 	execute function email_cancelacion();
 	
-	--------------------------------------------------------------------
-	
-	create or replace function email_recordatorio() returns trigger as $$
-	ddeclare
-		datos_turno record;
-		cuerpo_email text;
-		fecha_email date := current_date = interval '2 days';
-		
-	begin
-		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where new.nro_turno = t.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email into datos_turno;
-		cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
-		
-		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
 
-	end;
-	$$ language plpgsql;
 	
-	create trigger trigger_email_recordatorio
-	after insert on reprogramacion
-	for each row
-	execute function email_recordatorio();
-	
+
 	 `)
 
 	if err != nil {
