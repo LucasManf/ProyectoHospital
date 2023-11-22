@@ -336,121 +336,7 @@ func crearSP() {
 	
 	}
 
-func reservarTurno() {
 
-     db, err >) dbCOnnection()
-
-	 if err != nil {
-
-		 log.Fatal(err)
-	 }
-	 defer db.Close()
-
-_, err = dbExec(`
-	 create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno DATE, _hora_turno time) returns boolean as $$
-
-	 declare
-	 paciente_obrasocial int;
-	 medique_obrasocial int;
-	 cantidad_turnos_reservados int;
-
-	 begin
-// verificar si el paciente tiene una obra social
-select nro_obra_social into paciente_obrasocial
-from paciente
-where nro_paciente = _nro_paciente;
-
-// verificar su el dni del medique existe
-if not exists (select 1 from medique where dni_medique = _dni_medique) then
-raise exception 'Dni del medique no vàlido';
-end if;
-
-// verificar si el numero de historia clinica existe
-if not exists (select 1 from paciente where nro_paciente = _nro_paciente) then
-raise exception 'Nùmero de historia clìnica no vàlido';
-end if;
-
-// verificar si el paciente tiene una obra social y obtener la obra social
-if not exists (
-
-	select 1
-	from medique_obrasocial
-	where dni_medique = _dni_medique and nro_obrasocial = paciente_obrasocial
-) then
-raise exception 'Obra social de paciente no atendida por el medique';
-end if;
-
-// obtener la obra social del medique
-select nro_obrasocial into medique_obrasocial
-from medique_obrasocial
-where dni_medique = _dni_medique
-
-// verificar si el turno esta disponible
-if not exists (
-
-	select 1
-	from turno
-	where dni_medique = _dni_medique
-	and fecha = _fecha_turno
-	and hora = _hora_turno
-	and estado = 'Disponible'
-) then
-raise exception 'Turno inexistente o no disponible'
-end if;
-
-// realizar la reserva del turno
-update turno
-set
-nro_paciente = _nro_paciente,
-nro_obra_social_consulta = paciente_obrasocial,
-estado = 'Reservado'
-where
-dni_medique = _dni_medique
-and fecha = _fecha_turno
-and hora = _hora_turno
-and estado = 'Disponible';
-return true;
-end;
-
-// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
-select count(*) into cantidad_turnos_reservados
-from turno
-where nro_paciente = _nro_paciente and estado = 'Reservado';
-
-if cantidad_turnos_reservados >= 5 then
-raise exception 'Supera el lìmite de reserva de turnos';
-end if;
-
-$$ language plpgsql;
-`)
-
-}
-
-func emails(emailPaciente string, asunto string, body string) { 
-
-	db, err := dbConnection()
-	if err != nil {
-
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-_, err = dbExec(`
-
-create or replace function e_mails(email_paciente text, email_asunto text, email_body text) returns void as $$
-begin
-insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-values (now(), email_paciente, email_asunto, email_body, null, 'pendiente');
-end;
-$$ language plpgsql; `)
-
-if err != nil {
-
-	log.Fatal(err)
-
-}
-
-}
 
 func crearTriggers() {
 	
@@ -463,4 +349,207 @@ func eliminarPK() {
 func eliminarFK() {
 	
 	}
+
+//stored Procedures
+func reservarTurno() {
+
+     db, err := dbConnection()
+
+	 if err != nil {
+
+		 log.Fatal(err)
+	 }
+	 defer db.Close()
+
+	_, err = dbExec(`
+		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno DATE, _hora_turno time) returns boolean as $$
+
+		declare
+		paciente_obrasocial int;
+		medique_obrasocial int;
+		cantidad_turnos_reservados int;
+
+		begin
+		// verificar si el paciente tiene una obra social
+		select nro_obra_social into paciente_obrasocial
+		from paciente
+		where nro_paciente = _nro_paciente;
+
+		// verificar su el dni del medique existe
+		if not exists (select 1 from medique where dni_medique = _dni_medique) then
+			raise exception 'Dni del medique no vàlido';
+		end if;
+
+		// verificar si el numero de historia clinica existe
+		if not exists (select 1 from paciente where nro_paciente = _nro_paciente) then
+			raise exception 'Nùmero de historia clìnica no vàlido';
+		end if;
+
+		// verificar si el paciente tiene una obra social y obtener la obra social
+		if not exists (
+
+			select 1
+			from medique_obrasocial
+			where dni_medique = _dni_medique and nro_obrasocial = paciente_obrasocial
+		) then
+		raise exception 'Obra social de paciente no atendida por el medique';
+		end if;
+
+		// obtener la obra social del medique
+		select nro_obrasocial into medique_obrasocial
+		from medique_obrasocial
+		where dni_medique = _dni_medique
+
+		// verificar si el turno esta disponible
+		if not exists (
+
+			select 1
+			from turno
+			where dni_medique = _dni_medique
+			and fecha = _fecha_turno
+			and hora = _hora_turno
+			and estado = 'Disponible'
+		) then
+			raise exception 'Turno inexistente o no disponible'
+		end if;
+
+		// realizar la reserva del turno
+		update turno
+		set
+		nro_paciente = _nro_paciente,
+		nro_obra_social_consulta = paciente_obrasocial,
+		estado = 'Reservado'
+		where
+		dni_medique = _dni_medique
+		and fecha = _fecha_turno
+		and hora = _hora_turno
+		and estado = 'Disponible';
+		return true;
+		end;
+
+		// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
+		select count(*) into cantidad_turnos_reservados
+		from turno
+		where nro_paciente = _nro_paciente and estado = 'Reservado';
+
+		if cantidad_turnos_reservados >= 5 then
+			raise exception 'Supera el lìmite de reserva de turnos';
+		end if;
+
+		$$ language plpgsql;
+	`)
+
+}
+
+func cancelarTurno() {
+	db, err := dbConnection()
+
+	 if err != nil {
+
+		 log.Fatal(err)
+	 }
+	 defer db.Close()
+
+	_, err = dbExec(`
+		create or replace function cancelacion_turnos(_dni_medique int, _fdesde date, _fhasta date) returns int as $$
+		declare
+			reprog record;
+			cantidad_turnos_cancelados int;
+		
+		begin
+			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique , into reprog
+			where m.dni_medique = t.dni_medique and p.numero_paciente = t.numero_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado'
+
+			update turno
+			set estado = 'CANCELADO' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
+			
+			if found then
+				insert into reprogramacion values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono reprog.p.email, reprog.m.nombre, reprog.m.apellido, estado)
+				cantidad_turnos_cancelados := ROW_COUNT;
+			end if;
+		
+			return cantidad_turnos_cancelados;
+		end;
+		$$ language plpgsql;
+	`)
+}
+
+func atencionTurno() {
+	db, err := dbConnection()
+
+	 if err != nil {
+
+		 log.Fatal(err)
+	 }
+	 defer db.Close()
+
+	_, err = dbExec(`
+		create or replace function atencion_turnos(_nro_turno int) returns bool as $$
+		
+		declare
+			turno_atendido record;
+			
+		begin
+			select t.nro_turno from turno t into turno_atendido where t.nro_turno = _nro_turno;
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'atencion de turnos', now(), 'nro de turno no valido');
+				return false;
+			end if;
+			
+			
+			select t.estado from turno t into turno_atendido where t.nro_turno = _nro_turno and t.estado = 'reservado';
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no reservado');
+				return false;
+			end if;
+			
+			
+			select t.fecha, from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date;
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no corresponde a la fecha del dia');
+				return false;
+			end if;
+			
+			update turno
+			set estado = 'atendido' where nro_turno = _nro_turno;
+			
+			return true;			
+		end;
+		$$ language plpgsql;
+	`)
+}
+
+
+//Triggers
+func emails(emailPaciente string, asunto string, body string) {
+
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+
+	create or replace function e_mails() returns trigger as $$
+	begin
+	insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+	values (now(), email_paciente, email_asunto, email_body, null, 'pendiente');
+	end;
+	$$ language plpgsql; `)
+
+	if err != nil {
+
+		log.Fatal(err)
+
+	}
+
+}
 
