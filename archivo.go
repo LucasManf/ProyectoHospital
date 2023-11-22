@@ -22,6 +22,7 @@ func main() {
 		fmt.println("5. Cargar base de datos no relacional")
 		fmt.println("6. Mostrar base de datos no relacioanl")
 		fmt.println("7. Eliminar PKs y FKs")
+		fmt.println("8. Crear sp y triggers")
 		fmt.println("9. Ejecutar sp")
 		fmt.println("10. Ejecutar sp")
 		fmt.println("11. Ejecutar sp")
@@ -451,26 +452,27 @@ func cancelarTurno() {
 	 defer db.Close()
 
 	_, err = dbExec(`
-		create or replace function cancelacion_turnos(_dni_medique int, _fdesde date, _fhasta date) returns int as $$
+		create or replace function cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp) returns int as $$
 		declare
 			reprog record;
 			cantidad_turnos_cancelados int;
 		
 		begin
-			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique , into reprog
-			where m.dni_medique = t.dni_medique and p.numero_paciente = t.numero_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado'
+			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique m, into reprog 
+			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado';
 
 			update turno
 			set estado = 'CANCELADO' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			
 			if found then
-				insert into reprogramacion values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono reprog.p.email, reprog.m.nombre, reprog.m.apellido, estado)
+				insert into reprogramacion values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente')
 				cantidad_turnos_cancelados := ROW_COUNT;
 			end if;
 		
 			return cantidad_turnos_cancelados;
 		end;
 		$$ language plpgsql;
+
 	`)
 }
 
@@ -508,7 +510,7 @@ func atencionTurno() {
 			end if;
 			
 			
-			select t.fecha, from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date;
+			select t.fecha from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -522,6 +524,7 @@ func atencionTurno() {
 			return true;			
 		end;
 		$$ language plpgsql;
+
 	`)
 }
 
