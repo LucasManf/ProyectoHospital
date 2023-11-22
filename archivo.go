@@ -462,7 +462,7 @@ func cancelarTurno() {
 			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado';
 
 			update turno
-			set estado = 'CANCELADO' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
+			set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			
 			if found then
 				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono, reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente');
@@ -540,12 +540,73 @@ func emails(emailPaciente string, asunto string, body string) {
 
 	_, err = dbExec(`
 
-	create or replace function e_mails() returns trigger as $$
+	create or replace function email_reserva() returns trigger as $$
+	declare
+		datos_turno record;
+		cuerpo_email text;
+		
 	begin
-	insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-	values (now(), email_paciente, email_asunto, email_body, null, 'pendiente');
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where new.nro_turno = t.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique into datos_turno;
+		
+		cuerpo_email := 'se reservo su turno para el dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+		
+		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
 	end;
-	$$ language plpgsql; `)
+	$$ language plpgsql;
+	
+	create trigger trigger_email_reserva
+	after insert on turno
+	for each row
+	execute function email_reserva();
+	
+------------------------------------------------------------------------
+	
+	create or replace function email_cancelacion() returns trigger as $$
+	declare
+		datos_turno record;
+		cuerpo_email text;
+		
+	begin
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, medique m, turno t, reprogramacion r where new.nro_turno = r.nro_turno and t.nro_turno = r.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique into datos_paciente;		
+		cuerpo_email := 'se cancelo su turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+		
+		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
+	end;
+	$$ language plpgsql;
+	
+	create trigger trigger_email_cancelacion
+	after insert on reprogramacion
+	for each row
+	execute function email_cancelacion();
+	
+	--------------------------------------------------------------------
+	
+	create or replace function email_recordatorio() returns trigger as $$
+	ddeclare
+		datos_turno record;
+		cuerpo_email text;
+		fecha_email date := current_date = interval '2 days';
+		
+	begin
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where new.nro_turno = t.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email into datos_turno;
+		cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+		
+		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
+	end;
+	$$ language plpgsql;
+	
+	create trigger trigger_email_recordatorio
+	after insert on reprogramacion
+	for each row
+	execute function email_recordatorio();
+	
+	 `)
 
 	if err != nil {
 
