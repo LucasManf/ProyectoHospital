@@ -11,37 +11,55 @@ import (
 func main() {
 	_ = pq.QuoteIdentifier("some_text")
 	
-	fmt.println("Elegi una opcion:")
-	fmt.println("1 Crear BD")
-	fmt.println("2. Crear Tablas")
-	fmt.println("3. Crear PKs y FKs")
-	fmt.println("4. Cargar Tablas")
-	fmt.println("5. Crear Stored Procedures y Triggers")
-	fmt.println("6. Eliminar PKs y FKs")
-	
 	var opcion int
-	_, err:=fmt.scanln(&opcion)
+	
+	for opcion != 15 {
+		fmt.println("Elegi una opcion:")
+		fmt.println("1 Crear BD")
+		fmt.println("2. Crear Tablas")
+		fmt.println("3. Crear PKs y FKs")
+		fmt.println("4. Cargar Tablas")
+		fmt.println("5. Cargar base de datos no relacional")
+		fmt.println("6. Mostrar base de datos no relacioanl")
+		fmt.println("7. Eliminar PKs y FKs")
+		fmt.println("9. Ejecutar sp")
+		fmt.println("10. Ejecutar sp")
+		fmt.println("11. Ejecutar sp")
+		fmt.println("12. Ejecutar sp")
+		fmt.println("13. Ejecutar sp")
+		fmt.println("14. Ejecutar sp")
+		fmt.println("15. Salir")
 		
+		_, err:=fmt.scanln(&opcion)
+			
 
-	switch {
-		case opcion == 1:
-			crearDB()
-		case opcion == 2:
-			createTables()
-		case opcion == 3:
-			createPK()
-			createFK()
-		case opcion == 4:
-			cargarTablas()
-		case opcion == 5:
-			crearSP()
-			crearTriggers()
-		case opcion == 6:
-			eliminarPK()
-			eliminarFK()
-		default:
-			fmt.println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero")
+		switch {
+			case opcion == 1:
+				crearDB()
+			case opcion == 2:
+				createTables()
+			case opcion == 3:
+				createPK()
+				createFK()
+			case opcion == 4:
+				cargarTablas()
+			case opcion == 5:
+				cargarDatosJson()
+			case opcion == 6:
+				mostrarDatosJson()
+			case opcion == 7:
+				eliminarPK()
+				eliminarFK()
+			case opcion == 8:
+				crearSP()
+				crearTriggers()
+			case opcion == 15:
+				fmt.println("Adios!")
+			default:
+				fmt.println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
+		}
 	}
+	fmt.println("El programa se finalizo correctamente.")
 	
 }
 
