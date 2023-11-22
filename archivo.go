@@ -39,6 +39,8 @@ func main() {
 		case opcion == 6:
 			eliminarPK()
 			eliminarFK()
+		default:
+			fmt.println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero")
 	}
 	
 }
@@ -300,8 +302,137 @@ func cargarTablas() {
 
 
 func crearSP() {
+
+	db, err := dbConnection()
+
+	if err != nil {
+		log.Fatal(err)
+
+     }
+	 defer db.Close()
+
+	reservarTurno()
+	cancelarTurno()
+	atencionTurno()
+    emails()
 	
 	}
+
+func reservarTurno() {
+
+     db, err >) dbCOnnection()
+
+	 if err != nil {
+
+		 log.Fatal(err)
+	 }
+	 defer db.Close()
+
+_, err = dbExec(`
+	 create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno DATE, _hora_turno time) returns boolean as $$
+
+	 declare
+	 paciente_obrasocial int;
+	 medique_obrasocial int;
+	 cantidad_turnos_reservados int;
+
+	 begin
+// verificar si el paciente tiene una obra social
+select nro_obra_social into paciente_obrasocial
+from paciente
+where nro_paciente = _nro_paciente;
+
+// verificar su el dni del medique existe
+if not exists (select 1 from medique where dni_medique = _dni_medique) then
+raise exception 'Dni del medique no vàlido';
+end if;
+
+// verificar si el numero de historia clinica existe
+if not exists (select 1 from paciente where nro_paciente = _nro_paciente) then
+raise exception 'Nùmero de historia clìnica no vàlido';
+end if;
+
+// verificar si el paciente tiene una obra social y obtener la obra social
+if not exists (
+
+	select 1
+	from medique_obrasocial
+	where dni_medique = _dni_medique and nro_obrasocial = paciente_obrasocial
+) then
+raise exception 'Obra social de paciente no atendida por el medique';
+end if;
+
+// obtener la obra social del medique
+select nro_obrasocial into medique_obrasocial
+from medique_obrasocial
+where dni_medique = _dni_medique
+
+// verificar si el turno esta disponible
+if not exists (
+
+	select 1
+	from turno
+	where dni_medique = _dni_medique
+	and fecha = _fecha_turno
+	and hora = _hora_turno
+	and estado = 'Disponible'
+) then
+raise exception 'Turno inexistente o no disponible'
+end if;
+
+// realizar la reserva del turno
+update turno
+set
+nro_paciente = _nro_paciente,
+nro_obra_social_consulta = paciente_obrasocial,
+estado = 'Reservado'
+where
+dni_medique = _dni_medique
+and fecha = _fecha_turno
+and hora = _hora_turno
+and estado = 'Disponible';
+return true;
+end;
+
+// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
+select count(*) into cantidad_turnos_reservados
+from turno
+where nro_paciente = _nro_paciente and estado = 'Reservado';
+
+if cantidad_turnos_reservados >= 5 then
+raise exception 'Supera el lìmite de reserva de turnos';
+end if;
+
+$$ language plpgsql;
+`)
+
+}
+
+func emails(emailPaciente string, asunto string, body string) { 
+
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+_, err = dbExec(`
+
+create or replace function e_mails(email_paciente text, email_asunto text, email_body text) returns void as $$
+begin
+insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+values (now(), email_paciente, email_asunto, email_body, null, 'pendiente');
+end;
+$$ language plpgsql; `)
+
+if err != nil {
+
+	log.Fatal(err)
+
+}
+
+}
 
 func crearTriggers() {
 	
