@@ -8,10 +8,12 @@ import (
     "strconv"
 )
 
+// SQL: nro_paciente
+// Go: NroPaciente
 type Paciente struct {
-	nro_paciente int
+	NroPaciente int // fixme
 	nombre  string
-	apellido string
+	apellido string `json:apellido`
 	dni_paciente int
 	f_nacimiento string
 	nro_obra_social int
