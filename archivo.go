@@ -612,13 +612,13 @@ func emailsTrigger() {
 	
 ------------------------------------------------------------------------
 	
-	create or replace function email_cancelacion() returns trigger as $$
+create or replace function email_cancelacion() returns trigger as $$
 	declare
 		datos_turno record;
 		cuerpo_email text;
 		
 	begin
-		select p.email, m.nombre, m.apellido, t.fecha from paciente p, medique m, turno t, reprogramacion r where new.nro_turno = r.nro_turno and t.nro_turno = r.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique into datos_paciente;		
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, medique m, turno t, reprogramacion r where new.nro_turno = r.nro_turno and t.nro_turno = r.nro_turno and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique into datos_turno;		
 		cuerpo_email := 'se cancelo su turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
@@ -631,11 +631,7 @@ func emailsTrigger() {
 	after insert on reprogramacion
 	for each row
 	execute function email_cancelacion();
-	
-
-	
-
-	 `)
+	`)
 
 	if err != nil {
 
