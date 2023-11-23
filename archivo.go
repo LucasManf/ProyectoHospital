@@ -366,78 +366,94 @@ func reservarTurno() {
 		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno DATE, _hora_turno time) returns boolean as $$
 
 		declare
-		paciente_obrasocial int;
-		medique_obrasocial int;
-		cantidad_turnos_reservados int;
+			obrasocial_datos record;
+			medique_datos record;
+			cantidad_turnos_reservados int;
 
 		begin
-		// verificar si el paciente tiene una obra social
-		select nro_obra_social into paciente_obrasocial
-		from paciente
-		where nro_paciente = _nro_paciente;
+			// verificar si el paciente tiene una obra social
+			
+			select p.nro_paciente from turno t, medique m, cobertura c, obra_social o, paciente p where p.nro_paciente = _nro_paciente and t.dni_medique = _dni_medique and p.nro_obra_social = o.nro_obra_social and o.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique into obrasocial_datos;
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'reserva de turnos', now(), 'obra social de paciente no atendida por el medique');
+				return false;
+			end if;
 
-		// verificar su el dni del medique existe
-		if not exists (select 1 from medique where dni_medique = _dni_medique) then
-			raise exception 'Dni del medique no vàlido';
-		end if;
 
-		// verificar si el numero de historia clinica existe
-		if not exists (select 1 from paciente where nro_paciente = _nro_paciente) then
-			raise exception 'Nùmero de historia clìnica no vàlido';
-		end if;
+			// verificar su el dni del medique existe
+			select m.dni_medique from medique m where m.dni_medique = _dni_medique into medique_datos;
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
+				return false;
+			end if;
+			
 
-		// verificar si el paciente tiene una obra social y obtener la obra social
-		if not exists (
+			// verificar si el numero de historia clinica existe
+			select p.nro_paciente from paciente p where p.nro_paciente = _nro_paciente;
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'reserva de turnos', now(), 'nro de historia clinica no valido');
+				return false;
+			end if;
 
-			select 1
+
+			// verificar si el paciente tiene una obra social y obtener la obra social
+			select p.nro_obra_social from paciente p, obra_social o into obrasocial_datos where p.nro_obra_social = o.nro_obra_social
+			
+			if not found then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
+				return false;
+			end if;
+			
+			// obtener la obra social del medique
+			select nro_obrasocial into medique_obrasocial
 			from medique_obrasocial
-			where dni_medique = _dni_medique and nro_obrasocial = paciente_obrasocial
-		) then
-		raise exception 'Obra social de paciente no atendida por el medique';
-		end if;
-
-		// obtener la obra social del medique
-		select nro_obrasocial into medique_obrasocial
-		from medique_obrasocial
-		where dni_medique = _dni_medique
-
-		// verificar si el turno esta disponible
-		if not exists (
-
-			select 1
-			from turno
 			where dni_medique = _dni_medique
+
+			// verificar si el turno esta disponible
+			if not exists (
+
+				select 1
+				from turno
+				where dni_medique = _dni_medique
+				and fecha = _fecha_turno
+				and hora = _hora_turno
+				and estado = 'Disponible'
+			) then
+				raise exception 'Turno inexistente o no disponible'
+			end if;
+
+			// realizar la reserva del turno
+			update turno
+			set
+			nro_paciente = _nro_paciente,
+			nro_obra_social_consulta = paciente_obrasocial,
+			estado = 'Reservado'
+			where
+			dni_medique = _dni_medique
 			and fecha = _fecha_turno
 			and hora = _hora_turno
-			and estado = 'Disponible'
-		) then
-			raise exception 'Turno inexistente o no disponible'
-		end if;
+			and estado = 'Disponible';
+			return true;
+			end;
 
-		// realizar la reserva del turno
-		update turno
-		set
-		nro_paciente = _nro_paciente,
-		nro_obra_social_consulta = paciente_obrasocial,
-		estado = 'Reservado'
-		where
-		dni_medique = _dni_medique
-		and fecha = _fecha_turno
-		and hora = _hora_turno
-		and estado = 'Disponible';
-		return true;
+			// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
+			select count(*) into cantidad_turnos_reservados
+			from turno
+			where nro_paciente = _nro_paciente and estado = 'Reservado';
+
+			if cantidad_turnos_reservados >= 5 then
+				raise exception 'Supera el lìmite de reserva de turnos';
+			end if;
 		end;
-
-		// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
-		select count(*) into cantidad_turnos_reservados
-		from turno
-		where nro_paciente = _nro_paciente and estado = 'Reservado';
-
-		if cantidad_turnos_reservados >= 5 then
-			raise exception 'Supera el lìmite de reserva de turnos';
-		end if;
-
 		$$ language plpgsql;
+
 	`)
 
 }
