@@ -1,5 +1,5 @@
-=Informe TP Base de Datos II: hospital
-Martín Galvarini <13.martingalva@gmail.com>;
+= Informe TP Base de Datos II: hospital
+Martín Galvarini <13.martingalva@gmail.com>; Lorenzo Paparo <lolopaparo@gmail.com>; Gianluca Zeolla <@gmail.com>; Lucas Manfredi <@gmail.com>; Juan Mussino <@gmail.com>
 v1, {docdate}. Docente Hernan Rondelli (COM-08)
 :title-page:
 :numbered:
@@ -16,8 +16,11 @@ ortografía.
 
 == Introducción
 
-Descripción del trabajo práctico. Aquí se puede copiar textual el [ó
-parte del] enunciado del trabajo práctico de considerarse necesario.
+
+lul
+
+
+
 
 == Descripción
 
