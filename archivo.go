@@ -326,6 +326,7 @@ func crearSP() {
 	cancelarTurno()
 	atencionTurno()
     emails()
+	liquidacionObrasSociales()
 	
 	}
 
@@ -636,6 +637,70 @@ func emailsSP() {
 		
 	`)	
 }
+
+func liquidacionObrasSociales() { 
+
+    db, err :=dbConnection()
+	if err != nil {
+
+		los.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec(`
+	create or replace function generar_liquidacion_obras_sociales(_nro_obra_social int, _desde DATE, _hasta DATE) returns void as $$
+	declare 
+	total_liquidacion float := 0.0,
+	nro_liquidacion int;
+	begin
+	insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
+	values(_nro_obra_social, _desde, _hasta, total_liquidacion)
+	returning nro_liquidacion into nro_liquidacion,
+
+	update turno
+	set estado = 'liquidado'
+	where nro_obra_social_consulta = _nro_obra_social
+	and fecha between _desde and _hasta,
+
+	insert into liquidacion_detalle (nro_liquidacion f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, apellido_medique, especialidad, monto)
+	select
+	nro_liquidacion,
+	t.fecha,
+	t.nro_afiliade_consulta,
+	t.dni_paciente,
+	p.nombre,
+	p.apellido,
+	t.dni_medique,
+	m.nombre,
+	m.apellido,
+	m.especialidad,
+	t.monto-obra_social
+	from
+	turno t,
+	paciente p,
+	medique m
+	where
+	t.nro_obra_social_consulta = _nro_obra_social
+	and t.fecha between _desde and _hasta;
+
+
+	select sum(monto) into total_liquidacion
+	from liquidacion_detalle
+	where nro_liquidacion = nro_liquidacion;
+
+	update liquidacion_cabecera
+	set total = total_liquidacion
+	where nro_liquidacion = nro_liquidacion,
+
+	end;
+	$$ lagnguage plpgsql;
+`)
+if err != nil {
+
+	log.Fatal(err)
+}
+}
+
 
 
 //Triggers
