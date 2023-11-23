@@ -372,12 +372,12 @@ func reservarTurno() {
 
 		begin
 			// verificar si el paciente tiene una obra social
-			
 			select p.nro_paciente from turno t, medique m, cobertura c, obra_social o, paciente p where p.nro_paciente = _nro_paciente and t.dni_medique = _dni_medique and p.nro_obra_social = o.nro_obra_social and o.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique into obrasocial_datos;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'reserva de turnos', now(), 'obra social de paciente no atendida por el medique');
+				raise notice 'obra social de paciente no atendida por el medique';
 				return false;
 			end if;
 
@@ -388,6 +388,7 @@ func reservarTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
+				raise notice 'dni de medique no valido';
 				return false;
 			end if;
 			
@@ -398,6 +399,7 @@ func reservarTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'reserva de turnos', now(), 'nro de historia clinica no valido');
+				raise notice 'nro de historia clinica no valido';
 				return false;
 			end if;
 
@@ -408,6 +410,7 @@ func reservarTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
+				raise notice 'dni de medique no valido';
 				return false;
 			end if;
 			
