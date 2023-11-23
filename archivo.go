@@ -342,8 +342,29 @@ func eliminarFk() {
 	
 	_,err = db = db.Exec(`
 		alter table paciente drop constraint fk_paciente restrict;
+		alter table agenda drop constraint fk_agenda restrict;
+		alter table agenda drop contraint fk_agenda2 restrict;
+		alter table turno drop constraint fk_turno restric;
+		alter table turno drop constraint fk_turno2 restrict;
+		alter table turno drop constraint fk_turno3 restrict;
+		alter table turno drop constraint fk_turno4 restrict;
+		alter table reprogramacion drop constraint fk_reprogramacion restrict;
+		alter table error drop constraint fk_error restrict;
+		alter table error drop constraint fk_error2 restrict;
+		alter table error drop constraint fk_error3 restrict;
+		alter table cobertura drop constraint fk_cobertura restrict;
+		alter table cobertura drop constraint fk_cobertura2 restrict;
+		alter table liqudiacion_cabecera drop constraint fk_liq_cab restrict;
+		alter table liquidacion_detalle drop constraint fk_liq_det restrict;
+		alter table liquidacion_detalle drop constraint fk_liq_det2 restrict;`)
 
-	`)
+		if err != nil{
+
+			log.Fatal(err)
+		}
+		
+
+	
 }
 
 func eliminarPK() {
@@ -355,7 +376,25 @@ func eliminarPK() {
 	
 	_,err = db = db.Exec(`
 		alter table paciente drop constraint paciente_pk restrict;
-	`)
+		alter table medique drop constraint medique_pk restrict;
+		alter table consultorio drop constraint consultorio_pk restrict;
+		alter table agenda drop constraint agenda_pk restrict;
+		alter table turno drop constraint turno_pk restrict;
+		alter table reporgramacion drop constraint reprogramacion_pk restrict;
+		alter table error drop constraint error_pk restrict;
+		alter table cobertura drop constraint cobertura_pk restrict;
+		alter table obra_social drop cosntraint obra_social_pk restrict;
+		alter table liquidacion_cabecera drop constraint liquidacion_cabecera_pk restrict;
+		alter table liquidacion_detalle drop constraint liquidacion_detalle_pk restrict;
+		alter table envio_mail drop constraint envio_mail_pk restrict;
+		`)
+
+		if err != nil {
+
+			log.Fatal(err)
+		}
+
+	
 }
 
 //stored Procedures
