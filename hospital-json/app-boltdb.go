@@ -115,18 +115,41 @@ func main() {
     
     mediques :=[]Medique{
 		{DniMedique: 398121041, Nombre: "Carlos", Apellido: "Bilardo", Especialidad: "Ginecologo", MontoConsultaPrivada: 1500.50, Telefono: "11 4312-4574"},
+		{DniMedique: 10456789, Nombre: "Juan", Apellido: "Gomez", Especialidad: "Cardiología", MontoConsultaPrivada: 15000.00, Telefono: "112533-1234"},
+		{DniMedique: 40342233, Nombre: "Maria", Apellido: "Lopez", Especialidad: "Dermatología", MontoConsultaPrivada: 12000.00, Telefono: "113453-5678"},
+		{DniMedique: 11442233, Nombre: "Laura", Apellido: "Martinez", Especialidad: "Neurología", MontoConsultaPrivada: 20000.00, Telefono: "118987-3456"},
+		{DniMedique:12459135, Nombre: "Alberto", Apellido: "Fuentes", Especialidad: "Pediatría", MontoConsultaPrivada: 16000.00, Telefono: "119374-8901"},
 	}
 	
 	consultorios :=[]Consultorio{
 		{NroConsultorio: 1, Nombre: "Favaloro", Domicilio: "Italia 231, Martinez", CodigoPostal: 1640, Telefono: "4799-4153"},
+		{NroConsultorio: 2, Nombre: "Santa Catalina", Domicilio: "Belgrano 2809, Benavidez", CodigoPostal: 1621, Telefono: "5952-1897"},
+		{NroConsultorio: 3, Nombre: "Las Acacias", Domicilio: "Marcelo 1393, Don Torcuato", CodigoPostal: 1611, Telefono: "6826-7027"},
 	}
     
     turnos :=[]Turno{
 		{NroTurno: 1, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-14", Estado: "reservado"},
+		{NroTurno: 2, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 10456789, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-10-09", Estado: "reservado"},
+		{NroTurno: 3, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 40342233, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 16000.00, MontoObraSocial: 10100.00, FechaReserva: "2023-09-01", Estado: "reservado"},
+		{NroTurno: 4, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-08-13", Estado: "reservado"},
+		{NroTurno: 5, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 11442233, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-04-14", Estado: "reservado"},
+		{NroTurno: 6, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 398121041, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-20", Estado: "reservado"},
+		{NroTurno: 7, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 12459135, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 14000.00, MontoObraSocial: 9900.00, FechaReserva: "2023-10-22", Estado: "reservado"},
+		{NroTurno: 8, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 11442233, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-11-14", Estado: "reservado"},
+		{NroTurno: 9, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 10456789, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-08-25", Estado: "reservado"},
+		{NroTurno: 10, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 11442233, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-09-30", Estado: "reservado"},
+		{NroTurno: 11, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 12459135, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 14000.00, MontoObraSocial: 9900.00, FechaReserva: "2023-07-07", Estado: "reservado"},
+		{NroTurno: 12, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 398121041, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-07-30", Estado: "reservado"},
+		{NroTurno: 13, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-12", Estado: "reservado"},
+		{NroTurno: 14, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 398121041, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-11", Estado: "reservado"},
+		{NroTurno: 15, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 10456789, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-09-18", Estado: "reservado"},
+		
 	}
     
     obras_sociales :=[]ObraSocial{
 		{NroObraSocial: 1, Nombre: "Galeno", ContactoNombre: "Gabriel", ContactoApellido: "Galindo", ContactoTelefono: "11 4414-44120", ContactoEmail: "galeno@info.com"},
+		{NroObraSocial: 2, Nombre: "Omint", ContactoNombre: "Felipe", ContactoApellido: "Luna", ContactoTelefono: "11 5624-1120", ContactoEmail: "omint@info.com"},
+		{NroObraSocial: 3, Nombre: "Hospital Italiano", ContactoNombre: "Roberto", ContactoApellido: "Perez", ContactoTelefono: "11 2855-9291", ContactoEmail: "hitaliano@info.com"},
 	}
     
     //Escritura de datos
