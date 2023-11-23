@@ -1,12 +1,10 @@
-= TP Base de Datos II: hospital
+=Informe TP Base de Datos II: hospital
 Martín Galvarini <13.martingalva@gmail.com>;
 v1, {docdate}. Docente Hernan Rondelli (COM-08)
 :title-page:
 :numbered:
 :source-highlighter: coderay
 :tabsize: 4
-
-README.adoc
 
 El texto debe ser breve, conciso, simple, y directo. Se debe incluir
 sólo lo relevante que ayude a entender el trabajo práctico.
