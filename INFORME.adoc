@@ -1,5 +1,5 @@
 = Informe TP Base de Datos II: hospital
-Martín Galvarini <13.martingalva@gmail.com>; Lorenzo Paparo <lolopaparo@gmail.com>; Gianluca Zeolla <@gmail.com>; Lucas Manfredi <@gmail.com>; Juan Mussino <@gmail.com>
+Martín Galvarini <13.martingalva@gmail.com>; Lorenzo Paparo <lolopaparo@gmail.com>; Gianluca Zeolla <@gmail.com>; Lucas Manfredi <@gmail.com>; Juan_Ignacio Mussino <juani_mussino@hotmail.com>
 v1, {docdate}. Docente Hernan Rondelli (COM-08)
 :title-page:
 :numbered:

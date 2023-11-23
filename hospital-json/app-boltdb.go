@@ -160,7 +160,9 @@ func main() {
 			log.Fatal(err)
 		}
 		CreateUpdate(db, "pacientes", []byte(strconv.Itoa(paciente.NroPaciente)), data)
-	} 
+	}
+	
+	fmt.Printf("Pacientes cargados correctamente.\n")
 	
 	for _, medique:= range mediques {
 		data, err := json.Marshal(medique)
@@ -168,7 +170,9 @@ func main() {
 			log.Fatal(err)
 		}
 		CreateUpdate(db, "mediques", []byte(strconv.Itoa(medique.DniMedique)), data)
-	} 
+	}
+	
+	fmt.Printf("Mediques cargados correctamente.\n")
 	
 	for _, consultorio:= range consultorios {
 		data, err := json.Marshal(consultorio)
@@ -176,7 +180,9 @@ func main() {
 			log.Fatal(err)
 		}
 		CreateUpdate(db, "consultorios", []byte(strconv.Itoa(consultorio.NroConsultorio)), data)
-	} 
+	}
+	
+	fmt.Printf("Consultorios cargados correctamente.\n")
 	
 	for _, turno:= range turnos {
 		data, err := json.Marshal(turno)
@@ -184,7 +190,9 @@ func main() {
 			log.Fatal(err)
 		}
 		CreateUpdate(db, "turnos", []byte(strconv.Itoa(turno.NroTurno)), data)
-	} 
+	}
+	
+	fmt.Printf("Turnos cargados correctamente.\n")
 	
 	for _, obra_social:= range obras_sociales {
 		data, err := json.Marshal(obra_social)
@@ -194,7 +202,10 @@ func main() {
 		CreateUpdate(db, "obras sociales", []byte(strconv.Itoa(obra_social.NroObraSocial)), data)
 	}
 	
+	fmt.Printf("Obras sociales cargados correctamente.\n")
+	
 	//Lectura de datos
+	fmt.Printf("Pacientes:\n")
 	for _, paciente:= range pacientes {
 		resultado, err := ReadUnique(db, "pacientes", []byte(strconv.Itoa(paciente.NroPaciente)))
 		if err != nil {
@@ -202,7 +213,7 @@ func main() {
 		}
 		fmt.Printf("%s\n", resultado)
 	} 
-	
+	fmt.Printf("Mediques:\n")
 	for _, medique:= range mediques {
 		resultado, err := ReadUnique(db, "mediques", []byte(strconv.Itoa(medique.DniMedique)))
 		if err != nil {
@@ -210,7 +221,7 @@ func main() {
 		}
 		fmt.Printf("%s\n", resultado)
 	} 
-	
+	fmt.Printf("Consultorios:\n")
 	for _, consultorio:= range consultorios {
 		resultado, err := ReadUnique(db, "consultorios", []byte(strconv.Itoa(consultorio.NroConsultorio)))
 		if err != nil {
@@ -218,7 +229,7 @@ func main() {
 		}
 		fmt.Printf("%s\n", resultado)
 	} 
-	
+	fmt.Printf("Turnos:\n")
 	for _, turno:= range turnos {
 		resultado, err := ReadUnique(db, "turnos", []byte(strconv.Itoa(turno.NroTurno)))
 		if err != nil {
@@ -226,7 +237,7 @@ func main() {
 		}
 		fmt.Printf("%s\n", resultado)
 	} 
-	
+	fmt.Printf("Obras sociales::\n")
 	for _, obra_social:= range obras_sociales {
 		resultado, err := ReadUnique(db, "obras sociales", []byte(strconv.Itoa(obra_social.NroObraSocial)))
 		if err != nil {

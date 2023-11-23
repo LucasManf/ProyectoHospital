@@ -24,11 +24,11 @@ func main() {
 		fmt.println("7. Eliminar PKs y FKs")
 		fmt.println("8. Crear sp y triggers")
 		fmt.println("9. Ejecutar sp")
-		fmt.println("10. Ejecutar sp")
-		fmt.println("11. Ejecutar sp")
-		fmt.println("12. Ejecutar sp")
-		fmt.println("13. Ejecutar sp")
-		fmt.println("14. Ejecutar sp")
+		fmt.println("10. Ejecutar sp1")
+		fmt.println("11. Ejecutar sp2")
+		fmt.println("12. Ejecutar sp3")
+		fmt.println("13. Ejecutar sp4")
+		fmt.println("14. Ejecutar sp5")
 		fmt.println("15. Salir")
 		
 		_, err:=fmt.scanln(&opcion)
@@ -49,8 +49,8 @@ func main() {
 			case opcion == 6:
 				mostrarDatosJson()
 			case opcion == 7:
+				eliminarFk()
 				eliminarPK()
-				eliminarFK()
 			case opcion == 8:
 				crearSP()
 				crearTriggers()
@@ -65,22 +65,19 @@ func main() {
 }
 
 func dbConnection()(*sql.DB, error){
-       db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
-       if err != nil{
-       
+    db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
+	if err != nil{
        log.Fatal(err)
-}
+	}
 	return db, nil
 }
 
 // crear base de datos
-
 func crearDB() {
 	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=postgres sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	defer db.Close()
 	_, err = db.Exec("create DATABASE Hospital")
 
@@ -95,13 +92,13 @@ func crearDB() {
 func createTables() {
 	db, err := dbConnection()
 
-	_, err = db.Exec("DROP SCHEMA public CASCADE")
+	_, err = db.Exec("drop schema public cascade")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec("create SCHEMA public")
+	_, err = db.Exec("create schema public")
 
 	if err != nil {
 		log.Fatal(err)
@@ -123,7 +120,6 @@ func createTables() {
 		create table solicitud_reservas (nro_orden int, nro_paciente int, dni_medique int, fecha date, hora time);`
 		)
 		
-
 	if err != nil{
 		log.Fatal(err)
 	}
@@ -309,8 +305,6 @@ func cargarTablas() {
 		(10456789,2,1, '19:00', '23:00', '4 hour'),
 		(40342233,3,2, '6:00', '10:00' , '4 hour'),
 		(56565656,4,3, '19:00', '23:00', '4 hour' );`
-		
-		
 	)
 	
 	if err != nil{
@@ -318,8 +312,6 @@ func cargarTablas() {
 	}
 }
 	
-
-
 func crearSP() {
 
 	db, err := dbConnection()
@@ -337,27 +329,40 @@ func crearSP() {
 	
 	}
 
-
-
 func crearTriggers() {
-	
+	emailsTrigger()
+}
+
+func eliminarFk() {
+	db, err := dbConnection()
+	if err != nil {
+		log.Fatal(err)
 	}
+	defer db.close()
+	
+	_,err = db = db.Exec(`
+		alter table paciente drop constraint fk_paciente restrict;
+
+	`)
+}
 
 func eliminarPK() {
-	
+	db, err := dbConnection()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-func eliminarFK() {
+	defer db.close()
 	
-	}
+	_,err = db = db.Exec(`
+		alter table paciente drop constraint paciente_pk restrict;
+	`)
+}
 
 //stored Procedures
 func reservarTurno() {
 
      db, err := dbConnection()
-
 	 if err != nil {
-
 		 log.Fatal(err)
 	 }
 	 defer db.Close()
@@ -458,7 +463,6 @@ func reservarTurno() {
 		$$ language plpgsql;
 
 	`)
-
 }
 
 func cancelarTurno() {
@@ -545,7 +549,6 @@ func atencionTurno() {
 
 	`)
 }
-
 
 func emailsSP() {
 	
@@ -659,4 +662,3 @@ create or replace function email_cancelacion() returns trigger as $$
 	}
 
 }
-
