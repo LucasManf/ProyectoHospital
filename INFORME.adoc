@@ -21,7 +21,8 @@ es la creacion de una base de datos tanto en sql, go y json; sobre un hospital.
 Esta debe de incluir informacion de pacientes, medicos, turnos, obras sociales 
 consultorio y deversa informacion adicional. Esta debera contar con distintos 
 Stored Procedures que trabajen con esa base de datos como: 
-* Generacion de turnos disponibles.
+- Stored Procedures
+* Generacion de turnos disponibles. 
 * Reservas de turnos. 
 * Cancelacion de turnos.
 * Atencion de turnos.
