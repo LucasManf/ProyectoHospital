@@ -584,6 +584,7 @@ func atencionTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'atencion de turnos', now(), 'nro de turno no valido');
+				raise notice 'nro de turno no valido';
 				return false;
 			end if;
 			
@@ -593,6 +594,7 @@ func atencionTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no reservado');
+				raise notice 'turno no reservado';
 				return false;
 			end if;
 			
@@ -602,6 +604,7 @@ func atencionTurno() {
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no corresponde a la fecha del dia');
+				raise notice 'turno no corresponde a la fecha del dia';
 				return false;
 			end if;
 			
