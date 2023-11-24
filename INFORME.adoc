@@ -89,9 +89,22 @@ utilicen—a no ser que sea absolutamente necesario._
 
 == Conclusiones
 
-Aquí van algunas reflexiones acerca del proceso de desarrollo del
-trabajo realizado, y de los resultados obtenidos.
+//Aquí van algunas reflexiones acerca del proceso de desarrollo del
+//trabajo realizado, y de los resultados obtenidos.
 
-También se puede incluir una conclusión final de producto terminado.
+//También se puede incluir una conclusión final de producto terminado.
 
-Pueden incluirse lecciones aprendidas durante el desarrollo del trabajo.
+//Pueden incluirse lecciones aprendidas durante el desarrollo del trabajo.
+
+Atravez del desarrollo de esta base de datos pudimos llegar a distintos aprendizajes cada uno, como lo  
+
+fueron las maneras en que se debe organizar un grupo de progrmadores para dividir las tareas, o como 
+
+complementarse para sacar el maximo provecho de las caracterizticas de cada uno.
+
+tambien aprendimos como es la experiencia de la creacion de una base de datos compleja, 
+
+la cual ninguno de los miembros del grupo jamas habia hecho y lograr que esta pueda 
+
+pasar varias de las pruebas exigidas por este TP. 
+
