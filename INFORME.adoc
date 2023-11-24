@@ -38,7 +38,7 @@ Stored Procedures y triggers como:
 //funciona.
 
 
-Atravez  de este trabajo nos encontramos con distintos obstaculos. 
+A traves de este trabajo nos encontramos con distintos obstaculos. 
 
 Muchos de estos se debieron a la poca experiencia en los lenguajes 
 
@@ -80,18 +80,19 @@ y las difrerencias con las ya trabajadas en clase.
 		
 	
 	
-	
+
 	
 == Conclusiones
 
 //Aquí van algunas reflexiones acerca del proceso de desarrollo del
+
 //trabajo realizado, y de los resultados obtenidos.
 
 //También se puede incluir una conclusión final de producto terminado.
 
 //Pueden incluirse lecciones aprendidas durante el desarrollo del trabajo.
 
-Atravez del desarrollo de esta aplicación pudimos llegar a distintos aprendizajes cada uno, como lo  
+Durante el desarrollo de esta aplicación pudimos llegar a distintos aprendizajes cada uno, como lo  
 
 fueron las maneras en que se debe organizar un grupo de programadores para dividir las tareas, o como 
 
