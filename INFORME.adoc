@@ -76,6 +76,12 @@ y las difrerencias con las ya trabajadas en clase.
 //En esta sección se incluye el código fuente correctamente formateado—y
 //comentado, si corresponde.
 
+		`pinga`
+		
+	
+	
+	
+	
 == Conclusiones
 
 //Aquí van algunas reflexiones acerca del proceso de desarrollo del
