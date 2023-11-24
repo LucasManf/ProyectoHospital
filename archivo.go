@@ -109,7 +109,7 @@ func createTables() {
 		create table medique (dni_medique int, nombre text, apellido text, especialidad varchar(64), monto_consulta_privada decimal(12, 2), telefono char(12)); 
 		create table consultorio (nro_consultorio int, nombre text, domicilio text, codigo_postal char(8), telefono char(12));
 		create table agenda (dni_medique int, dia int, nro_consultorio int, hora_desde time, hora_hasta time, duracion_turno interval);
-		create table turno (nro_turno int, fecha timestamp, nro_consultorio int, dni_medique int, nro_paciente int, nro_obra_social_consulta int, nro_afiliade_consulta int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2), f_reserva timestamp, estado char(10));
+		create table turno (nro_turno serial, fecha timestamp, nro_consultorio int, dni_medique int, nro_paciente int, nro_obra_social_consulta int, nro_afiliade_consulta int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2), f_reserva timestamp, estado char(10));
 		create table reprogramacion (nro_turno int, nombre_paciente text, apellido_paciente text, telefono_paciente char(12), email_paciente text, nombre_medique text, apellido_medique text, estado char(12));
 		create table error (nro_error int, f_turno timestamp, nro_consultorio int, dni_medique int, nro_paciente int, operacion char(12), f_error timestamp, motivo varchar(64));
 		create table cobertura (dni_medique int, nro_obra_social int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2));
@@ -325,7 +325,8 @@ func crearSP() {
 	reservarTurno()
 	cancelarTurno()
 	atencionTurno()
-    emailsSP()
+    emailRecordatorioSP()
+    emailPerdidaSP()
 	liquidacionObrasSociales()
 	
 	}
@@ -611,11 +612,10 @@ func atencionTurno() {
 	`)
 }
 
-func emailsSP() {
+func emailRecordatorioSP() {
 	
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -637,26 +637,37 @@ func emailsSP() {
 
 		end;
 		$$ language plpgsql;
+		
+		`)	
+}
 	
-------------------------------------------------------------------------
-	
-	
-		create or replace function email_perdida_turno() returns void as $$
-			declare
-				datos_turno record;
-				cuerpo_email text;
-				
-			begin
-				select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha <= now() into datos_turno;
-				cuerpo_email := 'Perdiste tu turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
-				
-				insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-				values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+func emailPerdidaSP() {
 
-			end;
-			$$ language plpgsql;
+	db, err := dbConnection()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	
+	_, err = dbExec(`
+	
+	create or replace function email_perdida_turno() returns void as $$
+	declare
+		datos_turno record;
+		cuerpo_email text;
+		
+	begin
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha <= now() into datos_turno;
+		cuerpo_email := 'Perdiste tu turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+		
+		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
+		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+
+	end;
+	$$ language plpgsql;
 		
 	`)	
+
 }
 
 func liquidacionObrasSociales() { 

@@ -45,7 +45,7 @@ create table agenda(
 );	
 	
 create table turno(	
-	nro_turno int,
+	nro_turno serial,
 	fecha timestamp,
 	nro_consultorio int,
 	dni_medique int,
