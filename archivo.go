@@ -422,12 +422,29 @@ func generarTurnos() {
 				generate_series(
 					make_date(_anio, _mes, 1),
 					make_date(_anio, _mes + 1, 1) - interval '1 day', interval '1 day'
-				) :: timestamp as mes
+				) :: timestamp as dias
 			) into fechas_generadas;
 			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 1;
 			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 2;
 			
-			insert into turno (fecha, nro_consultorio, dni_medique)
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 3;
+			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 4;
+			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 5;
+			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 6;
+			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 7;
 			
 			
 		end;
