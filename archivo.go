@@ -519,18 +519,18 @@ func generarTurnos() {
 				) :: timestamp as dias
 			) into fechas_generadas;
 			
-			select array (
-				for i in select distinct(a.dia) from agenda a loop
-					select date_add(hora_desde);
-					select date_add(hora_desde, interval 1 hour);
-					select date_add(hora_desde, interval 2 hour);
-					select date_add(hora_desde, interval 3 hour);
-					select date_add(hora_desde, interval 4 hour);
-					select date_add(hora_desde, interval 5 hour);
-					select date_add(hora_desde, interval 6 hour);
-					select date_add(hora_desde, interval 7 hour);
+			
+				for dia in select distinct(a.dia) from agenda a loop
+					select date_add(hora_desde) into horas_generadas;
+					select date_add(hora_desde, interval 1 hour) into horas_generadas;
+					select date_add(hora_desde, interval 2 hour) into horas_generadas;
+					select date_add(hora_desde, interval 3 hour) into horas_generadas;
+					select date_add(hora_desde, interval 4 hour) into horas_generadas;
+					select date_add(hora_desde, interval 5 hour) into horas_generadas;
+					select date_add(hora_desde, interval 6 hour) into horas_generadas;
+					select date_add(hora_desde, interval 7 hour) into horas_generadas;
 				end loop;
-			) into horas_generadas;
+			
 			
 			insert into turno (fecha, dni_medique)
 			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 1 where horas_generadas = a.hora_desde;
