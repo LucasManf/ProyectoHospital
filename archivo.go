@@ -512,10 +512,18 @@ func generarTurnos() {
 			
 			select array (
 				generate_series(
-					make_date(_anio, _mes, 1),
-					make_date(_anio, _mes + 1, 1) - interval '1 day', interval '1 day'
+					make_date(_anio, _mes, 01),
+					make_date(_anio, _mes + 1, 01) - interval '1 day', interval '1 day'
 				) :: timestamp as dias
 			) into fechas_generadas;
+			
+			for i in select dia from agenda loop
+				for j in array_length(fechas_generadas) loop
+					
+				end loop;
+			end loop;
+			
+			
 			
 			
 				for dia in select distinct(a.dia) from agenda a loop
