@@ -8,7 +8,6 @@ import (
     "strconv"
 )
 
-// Go: NroPaciente
 type Paciente struct {
 	NroPaciente int
 	Nombre  string
