@@ -16,7 +16,7 @@ func main() {
 	
 	var opcion int
 	
-	for opcion != 15 {
+	for opcion != 16 {
 		fmt.println("Elegi una opcion:")
 		fmt.println("1 Crear BD")
 		fmt.println("2. Crear Tablas")
@@ -27,12 +27,13 @@ func main() {
 		fmt.println("7. Eliminar PKs y FKs")
 		fmt.println("8. Crear sp y triggers")
 		fmt.println("9. Generar turnos por mes")
-		fmt.println("10. Ejecutar sp1")
-		fmt.println("11. Ejecutar sp2")
-		fmt.println("12. Ejecutar sp3")
-		fmt.println("13. Ejecutar sp4")
-		fmt.println("14. Ejecutar sp5")
-		fmt.println("15. Salir")
+		fmt.println("10. Reservar turno")
+		fmt.println("11. Cancelacion de turno")
+		fmt.println("12. Atencion turno")
+		fmt.println("13. Email recordatorio")
+		fmt.println("14. Email perdida de turno")
+		fmt.println("15. Generar liquidacion de obras sociales")
+		fmt.println("16. Salir")
 		
 		_, err:=fmt.scanln(&opcion)
 			
@@ -67,7 +68,19 @@ func main() {
 				fmt.Scanf("%d", &mes)
 				
 				generarTurnos(int anio, int mes)
+			case opcion == 10:
+			    reservar_turno()
+			case opcion == 11:
+			    cancelacion_turnos()
+			case opcion == 12:
+			    atencion_turnos()
+			case opcion == 13:
+			    email_recordatorio()
+			case opcion == 14:
+			    email_perdida_turno()
 			case opcion == 15:
+			    liquidacionObrasSociales()                 	
+			case opcion == 16:
 				fmt.println("Adios!")
 			default:
 				fmt.println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
@@ -327,13 +340,13 @@ func cargarTablas() {
 	
 func crearSP() {
 
-	db, err := dbConnection()
+	
 
 	if err != nil {
 		log.Fatal(err)
 
     }
-	defer db.Close()
+	
 
 	reservarTurno()
 	cancelarTurno()
@@ -347,6 +360,9 @@ func crearSP() {
 func crearTriggers() {
 	emailsTrigger()
 }
+    if err != nil {
+		log.Fatal(err)
+	}
 
 func eliminarFk() {
 	db, err := dbConnection()
@@ -862,13 +878,85 @@ func generarTurnos(anio, mes int) {
 	_, err = dbExec(`
 		select generarTurnos($1,$2);
 	`)
+	
+func reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp)  {
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp);
+	`)
+	
+func cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp)	{
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp);
+	`)
+	
+func atencion_turnos(_nro_turno int) {
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select atencion_turnos(_nro_turno int);
+	`)	
+	
+func email_recordatorio() {
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select email_recordatorio();
+	`)	
+func email_perdida_turno() 	{
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select email_perdida_turno();
+	`)	
+
+func generar_liquidacion_obras_sociales(_nro_obra_social int, _desde date, _hasta date)	{
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select generar_liquidacion_obras_sociales(_nro_obra_social int, _desde date, _hasta date);
+	`)	
+	
 }
 
 
 //Comienzo json
 type Paciente struct {
 	NroPaciente int
-	Nombre  string
+	Nombre string
 	Apellido string
 	DniPaciente int
 	FechaNacimiento string
