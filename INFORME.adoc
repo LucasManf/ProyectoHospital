@@ -42,15 +42,15 @@ A traves de este trabajo nos encontramos con distintos obstaculos.
 
 Muchos de estos se debieron a la poca experiencia en los lenguajes 
 
-que debian ser utilizados tanto en json, go y asciidoc. 
+que debian de ser utilizados tanto en json, go y asciidoc. 
 
-Dividimos muy bien las tareas entre los integrantes del grupo para poder entender  
+Dividimos las tareas entre los integrantes del grupo para poder entender  
 
-cada uno de los distintos tipos de escritura haciendo que uno se ocupe 
+cada uno, los distintos tipos de escritura, haciendo que uno ocupe 
 
-de el json, otro del asciidoc y todos pusieron de su parte para entender la sintaxis de go 
+del json, otro del asciidoc y entre todos pusimos de nuestra parte para completar el archivo de 
 
-y en especial la implementacion de las ditintas librerias nuevas trabajadas. 
+go (postgres), y en especial la implementacion de las ditintas librerias nuevas trabajadas. 
 
 Tambien algunos de nosotros tuvimos problemas con entender GitLab y como conectarse 
 
@@ -75,6 +75,8 @@ y las difrerencias con las ya trabajadas en clase.
 
 //En esta sección se incluye el código fuente correctamente formateado—y
 //comentado, si corresponde.
+
+=== Aqui esta el codigo de ambas tamblas (Relcional y noRelacional)
 
 [source, go]
 ----
