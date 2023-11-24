@@ -407,19 +407,28 @@ func generarTurnos() {
 	_, err = dbExec(`
 		create or replace function generar_turnos(_anio int, _mes int) returns boolean as $$
 		declare
-			
+			fechas_generadas timestamp[];
 			
 		begin
 			//verificar si los turnos ya existen
-			select * from turno t where extract(year from t.fecha) = _anio and  extract(month from t.fecha) = _mes;
+			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
 			
 			if found then
 				raise notice 'Los turnos para esas fechas ya fueron generados';
 				return false;
 			end if;
 			
-			insert into turno (nro_turno, fecha, nro_consultorio, dni_medique)
-			select , 
+			select array (
+				generate_series(
+					make_date(_anio, _mes, 1),
+					make_date(_anio, _mes + 1, 1) - interval '1 day', interval '1 day'
+				) :: timestamp as mes
+			) into fechas_generadas;
+			
+			
+			
+			insert into turno (fecha, nro_consultorio, dni_medique)
+			
 			
 		end;
 		$$ language plpgsql;
