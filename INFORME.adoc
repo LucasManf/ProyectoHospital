@@ -67,8 +67,11 @@ Uno de los mayores obstaculos que tuvimos fueron los Stored procedures
 los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sintaxis. 
 
 
+Al final hicimos todo lo que pudimos, creando la base de datos con todas sus tablas y sus atributos; 
 
+sus Stored procedures con las caracteristicas pedidas; todo esto hecho en sql y luego pasado a go, 
 
+tambien hacerlo en una base de datos no relacional con Json. 
 
 == Implementación
 
