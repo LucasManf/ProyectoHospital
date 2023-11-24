@@ -4,6 +4,7 @@ package main
 import (
 	"encoding/json"
     "fmt"
+    "time"
     bolt "go.etcd.io/bbolt"
     "strconv"
 	"log"
@@ -17,26 +18,25 @@ func main() {
 	var opcion int
 	
 	for opcion != 16 {
-		fmt.println("Elegi una opcion:")
-		fmt.println("1 Crear BD")
-		fmt.println("2. Crear Tablas")
-		fmt.println("3. Crear PKs y FKs")
-		fmt.println("4. Cargar Tablas")
-		fmt.println("5. Cargar base de datos no relacional")
-		fmt.println("6. Mostrar base de datos no relacioanl")
-		fmt.println("7. Eliminar PKs y FKs")
-		fmt.println("8. Crear sp y triggers")
-		fmt.println("9. Generar turnos por mes")
-		fmt.println("10. Reservar turno")
-		fmt.println("11. Cancelacion de turno")
-		fmt.println("12. Atencion turno")
-		fmt.println("13. Email recordatorio")
-		fmt.println("14. Email perdida de turno")
-		fmt.println("15. Generar liquidacion de obras sociales")
-		fmt.println("16. Salir")
+		fmt.Println("Elegi una opcion:")
+		fmt.Println("1 Crear BD")
+		fmt.Println("2. Crear Tablas")
+		fmt.Println("3. Crear PKs y FKs")
+		fmt.Println("4. Cargar Tablas")
+		fmt.Println("5. Cargar base de datos no relacional")
+		fmt.Println("6. Mostrar base de datos no relacional")
+		fmt.Println("7. Eliminar PKs y FKs")
+		fmt.Println("8. Crear sp y triggers")
+		fmt.Println("9. Generar turnos por mes")
+		fmt.Println("10. Reservar turno")
+		fmt.Println("11. Cancelacion de turno")
+		fmt.Println("12. Atencion turno")
+		fmt.Println("13. Email recordatorio")
+		fmt.Println("14. Email perdida de turno")
+		fmt.Println("15. Generar liquidacion de obras sociales")
+		fmt.Println("16. Salir")
 		
 		_, err:=fmt.scanln(&opcion)
-			
 
 		switch {
 			case opcion == 1:
@@ -62,32 +62,101 @@ func main() {
 				var anio int
 				var mes int
 				
-				fmt.print("Ingrese el año a generar turnos: ")
+				fmt.Print("Ingrese el año a generar turnos: ")
 				fmt.Scanf("%d", &anio)
-				fmt.print("Ingrese el mes a generar turnos: ")
+				fmt.Print("Ingrese el mes a generar turnos: ")
 				fmt.Scanf("%d", &mes)
 				
 				generarTurnos(int anio, int mes)
 			case opcion == 10:
-			    reservar_turno()
+				var (
+					nro_paciente int
+					dni_medique int
+					fecha_turno string
+				)
+				fmt.Print("Ingrese el numero de historia medica del paciente: ")
+				fmt.Scanf("%d", &nro_paciente)
+				fmt.Print("Ingrese el DNI del medique: ")
+				fmt.Scanf("%d", &dni_medique)
+				fmt.Print("Ingresa una fecha y hora para el turno (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Scanf("%s", &fecha_turno)	
+				
+				t, err := time.Parse("2006-01-02 15:04:05", fecha_turno)
+				if err != nil {
+					fmt.Println("Error al parsear la fecha y hora:", err)
+					return
+				}			
+				
+			    reservarTurno(nro_paciente, dni_medique, fecha_turno)
 			case opcion == 11:
-			    cancelacion_turnos()
+				var (
+					dni_medique int
+					f_desde string
+					f_hasta string
+				)
+				
+				fmt.Print("Ingrese el DNI del medique: ")
+				fmt.Scanf("%d", &dni_medique)
+				fmt.Print("Ingrese la fecha de inicio para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Scanf("%s", &f_desde)
+				fmt.Printf("Ingrese la fecha final para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Scanf("%s", &f_hasta)
+						
+				t, err := time.Parse("2006-01-02 15:04:05", f_desde)
+				if err != nil {
+					fmt.Println("Error al parsear la fecha y hora:", err)
+					return
+				}			
+					
+				t, err := time.Parse("2006-01-02 15:04:05", f_hasta)
+				if err != nil {
+					fmt.Println("Error al parsear la fecha y hora:", err)
+					return
+				}		
+								
+			    cancelacionTurnos(dni_medique, f_desde, f_hasta)
 			case opcion == 12:
-			    atencion_turnos()
-			case opcion == 13:
-			    email_recordatorio()
+				var nro_turno int
+				fmt.Print("Ingrese el numero del turno: ")
+				fmt.Scanf("%d", &nro_turno)
+			
+			    atencionTurnos(nro_turno)
+			case opcion == 13:			
+			    emailRecordatorio()
 			case opcion == 14:
-			    email_perdida_turno()
+			    emailPerdidaTurno()
 			case opcion == 15:
-			    liquidacionObrasSociales()                 	
+				var (
+					nro_obra_social int
+					f_desde string
+					f_hasta string
+				)
+				
+				fmt.Print("Ingrese el numero de obra social: ")
+				fmt.Scanf("%d", &dni_medique)				
+				fmt.Print("Ingrese la fecha de inicio para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Scanf("%s", &f_desde)
+				fmt.Printf("Ingrese la fecha final para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Scanf("%s", &f_hasta)
+						
+				t, err := time.Parse("2006-01-02 15:04:05", f_desde)
+				if err != nil {
+					fmt.Println("Error al parsear la fecha y hora:", err)
+					return
+				}			
+				t, err := time.Parse("2006-01-02 15:04:05", f_hasta)
+				if err != nil {
+					fmt.Println("Error al parsear la fecha y hora:", err)
+					return
+			
+			    generarLiquidacionObrasSociales(nro_obra_social, f_desde, f_hasta)                 	
 			case opcion == 16:
-				fmt.println("Adios!")
+				fmt.Println("Adios!")
 			default:
-				fmt.println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
+				fmt.Println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
 		}
 	}
-	fmt.println("El programa se finalizo correctamente.")
-	
+	fmt.Println("El programa se finalizo correctamente.")
 }
 
 func dbConnection()(*sql.DB, error){
@@ -339,15 +408,11 @@ func cargarTablas() {
 }
 	
 func crearSP() {
-
-	
-
 	if err != nil {
 		log.Fatal(err)
 
     }
 	
-
 	reservarTurno()
 	cancelarTurno()
 	atencionTurno()
@@ -358,11 +423,12 @@ func crearSP() {
 	}
 
 func crearTriggers() {
-	emailsTrigger()
-}
-    if err != nil {
+	if err != nil {
 		log.Fatal(err)
 	}
+	
+	emailsTrigger()
+}
 
 func eliminarFk() {
 	db, err := dbConnection()
@@ -867,7 +933,7 @@ create or replace function email_cancelacion() returns trigger as $$
 	}
 }
 
-func generarTurnos(anio, mes int) {
+func generarTurnos(_anio int, _mes int) {
 	db, err := dbConnection()
 	if err != nil {
 
@@ -879,46 +945,42 @@ func generarTurnos(anio, mes int) {
 		select generarTurnos($1,$2);
 	`)
 	
-func reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp)  {
+func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	_, err = dbExec(`
-		select reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp);
+		select reservar_turno($1, $2, $3);
 	`)
 	
-func cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp)	{
+func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	_, err = dbExec(`
-		select cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp);
+		select cancelacion_turnos($1, $2, $3);
 	`)
 	
-func atencion_turnos(_nro_turno int) {
+func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	_, err = dbExec(`
-		select atencion_turnos(_nro_turno int);
+		select atencion_turnos($1);
 	`)	
 	
-func email_recordatorio() {
+func emailRecordatorio() {
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -926,10 +988,9 @@ func email_recordatorio() {
 	_, err = dbExec(`
 		select email_recordatorio();
 	`)	
-func email_perdida_turno() 	{
+func emailPerdidaTurno() 	{
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -938,20 +999,18 @@ func email_perdida_turno() 	{
 		select email_perdida_turno();
 	`)	
 
-func generar_liquidacion_obras_sociales(_nro_obra_social int, _desde date, _hasta date)	{
+func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _hasta time.Time)	{
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	_, err = dbExec(`
-		select generar_liquidacion_obras_sociales(_nro_obra_social int, _desde date, _hasta date);
+		select generar_liquidacion_obras_sociales($1, $2, $3);
 	`)	
 	
 }
-
 
 //Comienzo json
 type Paciente struct {
