@@ -500,6 +500,8 @@ func generarTurnos() {
 		declare
 			fechas_generadas timestamp[];
 			horas_generadas time[];
+			hora1 time;
+			hora2 time;
 			
 		begin
 			//verificar si los turnos ya existen
@@ -517,14 +519,11 @@ func generarTurnos() {
 				) :: timestamp as dias
 			) into fechas_generadas;
 			
-			for i in select dia from agenda loop
-				for j in array_length(fechas_generadas) loop
+			for i in select distinct(a.dia) from agenda a loop
+				for j in  loop
 					
 				end loop;
 			end loop;
-			
-			
-			
 			
 				for dia in select distinct(a.dia) from agenda a loop
 					select date_add(hora_desde) into horas_generadas;
