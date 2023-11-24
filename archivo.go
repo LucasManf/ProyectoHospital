@@ -158,6 +158,7 @@ func main() {
 	}
 	fmt.Println("El programa se finalizo correctamente.")
 }
+}
 
 func dbConnection()(*sql.DB, error){
     db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
