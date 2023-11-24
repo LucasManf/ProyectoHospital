@@ -45,15 +45,25 @@ Stored Procedures que trabajen con esa base de datos como:
 //También, se puede incluir una descripción general del programa—cómo
 //funciona.
 
+
 Atravez  de este trabajo nos encontramos con distintos obstaculos. 
+
 Muchos de estos se debieron a la poca experiencia en los lenguajes 
+
 que debian ser utilizados tanto en json, go y asciidoc. 
+
 Dividimos muy bien las tareas entre los integrantes del grupo para poder entender  
+
 cada uno de los distintos tipos de escritura haciendo que uno se ocupe 
+
 de el json, otro del asciidoc y todos pusieron de su parte para entender la sintaxis de go. 
+
 Tambien algunos de nosotros tuvimos problemas con entender GitLab y como conectarse 
+
 ya sea desde el git bash como desde la virtual machine de alpine. 
+
 Uno de los mayores obstaculos que tuvimos fueron los Stored procedures 
+
 los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sintaxis. 
 
 
