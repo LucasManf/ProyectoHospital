@@ -1,5 +1,5 @@
 = Informe TP Base de Datos II: hospital
-Martín Galvarini <13.martingalva@gmail.com>; Lorenzo Paparo <lolopaparo@gmail.com>; Gianluca Zeolla <@gmail.com>; Lucas Manfredi <@gmail.com>; Juan_Ignacio Mussino <juani_mussino@hotmail.com>
+Martín Galvarini <13.martingalva@gmail.com>; Lorenzo Paparo <lolopaparo@gmail.com>; Gianluca Zeolla <gianluze14@gmail.com>; Lucas Manfredi <lucasmanfredij@gmail.com>; Juan_Ignacio Mussino <juani_mussino@hotmail.com>
 v1, {docdate}. Docente Hernan Rondelli (COM-08)
 :title-page:
 :numbered:
@@ -16,12 +16,18 @@ ortografía.
 
 == Introducción
 
-El trabajo practico como segundo parcial de la materia "Base de datos II" 
+El trabajo practico como segundo parcial de la materia "Base de datos II"
+
 es la creacion de una base de datos tanto en sql, go y json; sobre un hospital. 
+
 Esta debe de incluir informacion de pacientes, medicos, turnos, obras sociales 
+
 consultorio y deversa informacion adicional. Esta debera contar con distintos 
+
 Stored Procedures que trabajen con esa base de datos como: 
-* Generacion de turnos disponibles.
+
+- Stored Procedures: 
+* Generacion de turnos disponibles. 
 * Reservas de turnos. 
 * Cancelacion de turnos.
 * Atencion de turnos.
@@ -31,13 +37,28 @@ Stored Procedures que trabajen con esa base de datos como:
 
 == Descripción
 
-En esta sección pueden incluirse las dificultades que tuvieron, las
-soluciones encontradas, las decisiones que se fueron tomando a lo largo
-del trabajo práctico, y las cuestiones de diseño que consideren
-importantes.
+//En esta sección pueden incluirse las dificultades que tuvieron, las
+//soluciones encontradas, las decisiones que se fueron tomando a lo largo
+//del trabajo práctico, y las cuestiones de diseño que consideren
+//importantes.
 
-También, se puede incluir una descripción general del programa—cómo
-funciona.
+//También, se puede incluir una descripción general del programa—cómo
+//funciona.
+
+Atravez  de este trabajo nos encontramos con distintos obstaculos. 
+Muchos de estos se debieron a la poca experiencia en los lenguajes 
+que debian ser utilizados tanto en json, go y asciidoc. 
+Dividimos muy bien las tareas entre los integrantes del grupo para poder entender  
+cada uno de los distintos tipos de escritura haciendo que uno se ocupe 
+de el json, otro del asciidoc y todos pusieron de su parte para entender la sintaxis de go. 
+Tambien algunos de nosotros tuvimos problemas con entender GitLab y como conectarse 
+ya sea desde el git bash como desde la virtual machine de alpine. 
+Uno de los mayores obstaculos que tuvimos fueron los Stored procedures 
+los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sintaxis. 
+
+
+
+
 
 == Implementación
 
