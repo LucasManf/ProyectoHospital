@@ -6,27 +6,19 @@ v1, {docdate}. Docente Hernan Rondelli (COM-08)
 :source-highlighter: coderay
 :tabsize: 4
 
-El texto debe ser breve, conciso, simple, y directo. Se debe incluir
-sólo lo relevante que ayude a entender el trabajo práctico.
-
-Se recomiendan oraciones y párrafos cortos.
-
-Por último, no olvidar utilizar signos de puntuación y checkear la
-ortografía.
-
 == Introducción
 
-El trabajo practico como segundo parcial de la materia "Base de datos II"
+El trabajo practico como reemplazo del segundo parcial de la materia "Base de datos II"
 
-es la creacion de una base de datos tanto en sql, go y json; sobre un hospital. 
+consiste en la creacion de una base de datos relacional sql y otra no relacional en json (utilizando librerias de boltdb); sobre un hospital.
 
-Esta debe de incluir informacion de pacientes, medicos, turnos, obras sociales 
+Ambas seran ejecutadas mediante un programa en lenguaje go y deberan de incluir informacion de pacientes, medicos,
 
-consultorio y deversa informacion adicional. Esta debera contar con distintos 
+turnos, obras sociales y consultorios, entre otras cosas. La base de datos sql debera contar con distintos 
 
-Stored Procedures que trabajen con esa base de datos como: 
+Stored Procedures y triggers como: 
 
-- Stored Procedures: 
+- Stored Procedures y triggers: 
 * Generacion de turnos disponibles. 
 * Reservas de turnos. 
 * Cancelacion de turnos.
@@ -56,7 +48,9 @@ Dividimos muy bien las tareas entre los integrantes del grupo para poder entende
 
 cada uno de los distintos tipos de escritura haciendo que uno se ocupe 
 
-de el json, otro del asciidoc y todos pusieron de su parte para entender la sintaxis de go. 
+de el json, otro del asciidoc y todos pusieron de su parte para entender la sintaxis de go 
+
+y en especial la implementacion de las ditintas librerias nuevas trabajadas. 
 
 Tambien algunos de nosotros tuvimos problemas con entender GitLab y como conectarse 
 
@@ -69,23 +63,18 @@ los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sin
 
 Al final hicimos todo lo que pudimos, creando la base de datos con todas sus tablas y sus atributos; 
 
-sus Stored procedures con las caracteristicas pedidas; todo esto hecho en sql y luego pasado a go, 
+sus Stored procedures con las caracteristicas pedidas; todo esto hecho y testado en postgres sql y luego pasado a go.
 
-tambien hacerlo en una base de datos no relacional con Json. 
+Tambien pudimos hacer la base de datos con Json que, al tratarse de una tarea mucho menos compleja, 
+
+pudo salir con mayor facilidad y ayudo a comprender de que se trataban las bases de datos no relacionales 
+
+y las difrerencias con las ya trabajadas en clase. 
 
 == Implementación
 
-En esta sección se incluye el código fuente correctamente formateado—y
-comentado, si corresponde.
-
-Además, por cada fragmento de código
-relevante—i.e. función, método, procedimiento—se debe dar una
-breve descripción, decir qué hace, y especificar los parámetros que
-toma la función/método/procedimiento, junto con los valores que devuelve
-ó modifica.
-
-_No debería incluirse el código de librerías/frameworks que se
-utilicen—a no ser que sea absolutamente necesario._
+//En esta sección se incluye el código fuente correctamente formateado—y
+//comentado, si corresponde.
 
 == Conclusiones
 
@@ -96,15 +85,17 @@ utilicen—a no ser que sea absolutamente necesario._
 
 //Pueden incluirse lecciones aprendidas durante el desarrollo del trabajo.
 
-Atravez del desarrollo de esta base de datos pudimos llegar a distintos aprendizajes cada uno, como lo  
+Atravez del desarrollo de esta aplicación pudimos llegar a distintos aprendizajes cada uno, como lo  
 
-fueron las maneras en que se debe organizar un grupo de progrmadores para dividir las tareas, o como 
+fueron las maneras en que se debe organizar un grupo de programadores para dividir las tareas, o como 
 
-complementarse para sacar el maximo provecho de las caracterizticas de cada uno.
+complementarse para sacar el maximo provecho de las caracteristicas de cada uno.
 
-tambien aprendimos como es la experiencia de la creacion de una base de datos compleja, 
+Pudimos ver de una manera clara las diferencias entre una base de datos relacional y no relacional.
 
-la cual ninguno de los miembros del grupo jamas habia hecho y lograr que esta pueda 
+Tambien aprendimos como es la experiencia de la creacion de una base de datos tan grande y compleja, 
+
+por lo menos comparandola con lo que habiamos trabajado previamente en la cursada, y lograr que esta pueda 
 
 pasar varias de las pruebas exigidas por este TP. 
 

@@ -360,12 +360,8 @@ func eliminarFk() {
 		alter table liquidacion_detalle drop constraint fk_liq_det2 restrict;`)
 
 		if err != nil{
-
 			log.Fatal(err)
 		}
-		
-
-	
 }
 
 func eliminarPK() {
@@ -391,22 +387,18 @@ func eliminarPK() {
 		`)
 
 		if err != nil {
-
 			log.Fatal(err)
 		}
-
-	
 }
 
 //stored Procedures
 func generarTurnos() {
 	db, err := dbConnection()
 
-	 if err != nil {
-
-		 log.Fatal(err)
-	 }
-	 defer db.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 	_, err = dbExec(`
 		create or replace function generar_turnos(_anio int, _mes int) returns boolean as $$
@@ -723,14 +715,11 @@ func liquidacionObrasSociales() {
 
 	end;
 	$$ lagnguage plpgsql;
-`)
-if err != nil {
-
-	log.Fatal(err)
+	`)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
-}
-
-
 
 //Triggers
 func emailsTrigger() {
@@ -789,7 +778,6 @@ create or replace function email_cancelacion() returns trigger as $$
 	`)
 
 	if err != nil {
-
 		log.Fatal(err)
 
 	}
