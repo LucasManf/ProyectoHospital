@@ -325,7 +325,7 @@ func crearSP() {
 	reservarTurno()
 	cancelarTurno()
 	atencionTurno()
-    emails()
+    emailsSP()
 	liquidacionObrasSociales()
 	
 	}
@@ -399,6 +399,27 @@ func eliminarPK() {
 }
 
 //stored Procedures
+func generarTurnos() {
+	db, err := dbConnection()
+
+	 if err != nil {
+
+		 log.Fatal(err)
+	 }
+	 defer db.Close()
+
+	_, err = dbExec(`
+		create or replace function generar_turnos(_fecha timestamp) returns boolean as $$
+		declare
+			
+		
+		begin
+			
+		end;
+		$$ language plpgsql;
+	`)
+	}
+
 func reservarTurno() {
 
      db, err := dbConnection()
@@ -408,27 +429,18 @@ func reservarTurno() {
 	 defer db.Close()
 
 	_, err = dbExec(`
-		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno DATE, _hora_turno time) returns boolean as $$
+		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp) returns boolean as $$
 
 		declare
 			obrasocial_datos record;
-			medique_datos record;
+			paciente_datos record;
 			cantidad_turnos_reservados int;
+			condicion boolean;
 
 		begin
-			// verificar si el paciente tiene una obra social
-			select p.nro_paciente from turno t, medique m, cobertura c, obra_social o, paciente p where p.nro_paciente = _nro_paciente and t.dni_medique = _dni_medique and p.nro_obra_social = o.nro_obra_social and o.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique into obrasocial_datos;
 			
-			if not found then
-				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'obra social de paciente no atendida por el medique');
-				raise notice 'obra social de paciente no atendida por el medique';
-				return false;
-			end if;
-
-
 			// verificar su el dni del medique existe
-			select m.dni_medique from medique m where m.dni_medique = _dni_medique into medique_datos;
+			select m.dni_medique from medique m where m.dni_medique = _dni_medique;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -447,42 +459,56 @@ func reservarTurno() {
 				raise notice 'nro de historia clinica no valido';
 				return false;
 			end if;
-
-
+			
 			// verificar si el paciente tiene una obra social y obtener la obra social
-			select p.nro_obra_social from paciente p, obra_social o into obrasocial_datos where p.nro_obra_social = o.nro_obra_social
+			condicion := false;
+			select p.nro_obra_social from paciente p, obra social o where p.nro_obra_social = o.nro_obra_social into paciente_datos;
+			
+			if found then
+				condicion := true;
+			end if;
+			
+			// verificar si el medique atiende esa obra social
+			case
+				when condicion then
+					select * from cobertura p, obra_social o where c.dni_medique = _dni_medique and c.nro_obra_social = paciente_datos.nro_obra_social;
+					
+					if not found then
+						insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+						values (now(), null, null, null, 'reserva de turnos', now(), 'obra social no atendida por el medique');
+						raise notice 'obra social no atendida por el medique';
+						return false;
+					end if;
+			end case;
+			
+			// verificar si el turno esta disponible
+			
+			select nro_turno from turno t where t.fecha = _fecha_hora_turno and t.dni_medique = _dni_medique and estado = 'disponible'
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
-				raise notice 'dni de medique no valido';
+				values (now(), null, null, null, 'reserva de turnos', now(), 'turno inexistente o no disponible');
+				raise notice 'turno inexistente o no disponible';
 				return false;
 			end if;
 			
-			// obtener la obra social del medique
-			select nro_obrasocial into medique_obrasocial
-			from medique_obrasocial
-			where dni_medique = _dni_medique
+			// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
+			select count(*) from turno where nro_paciente = _nro_paciente and estado = 'Reservado' into cantidad_turnos_reservados ;
 
-			// verificar si el turno esta disponible
-			if not exists (
-
-				select 1
-				from turno
-				where dni_medique = _dni_medique
-				and fecha = _fecha_turno
-				and hora = _hora_turno
-				and estado = 'Disponible'
-			) then
-				raise exception 'Turno inexistente o no disponible'
+			if cantidad_turnos_reservados >= 5 then
+				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
+				values (now(), null, null, null, 'reserva de turnos', now(), 'Supera el lìmite de reserva de turnos');
+				raise notice 'Supera el lìmite de reserva de turnos';
+				return false;
 			end if;
-
+			
 			// realizar la reserva del turno
 			update turno
 			set
 			nro_paciente = _nro_paciente,
 			nro_obra_social_consulta = paciente_obrasocial,
-			estado = 'Reservado'
+			estado = 'Reservado',
+			f_reserva = datetime
 			where
 			dni_medique = _dni_medique
 			and fecha = _fecha_turno
@@ -491,14 +517,7 @@ func reservarTurno() {
 			return true;
 			end;
 
-			// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
-			select count(*) into cantidad_turnos_reservados
-			from turno
-			where nro_paciente = _nro_paciente and estado = 'Reservado';
-
-			if cantidad_turnos_reservados >= 5 then
-				raise exception 'Supera el lìmite de reserva de turnos';
-			end if;
+			
 		end;
 		$$ language plpgsql;
 
@@ -650,47 +669,47 @@ func liquidacionObrasSociales() {
 	_, err = db.Exec(`
 	create or replace function generar_liquidacion_obras_sociales(_nro_obra_social int, _desde DATE, _hasta DATE) returns void as $$
 	declare 
-	total_liquidacion float := 0.0,
-	nro_liquidacion int;
+		total_liquidacion float := 0.0,
+		nro_liquidacion int;
 	begin
-	insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
-	values(_nro_obra_social, _desde, _hasta, total_liquidacion)
-	returning nro_liquidacion into nro_liquidacion,
+		insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
+		values(_nro_obra_social, _desde, _hasta, total_liquidacion)
+		returning nro_liquidacion into nro_liquidacion,
 
-	update turno
-	set estado = 'liquidado'
-	where nro_obra_social_consulta = _nro_obra_social
-	and fecha between _desde and _hasta,
+		update turno
+		set estado = 'liquidado'
+		where nro_obra_social_consulta = _nro_obra_social
+		and fecha between _desde and _hasta,
 
-	insert into liquidacion_detalle (nro_liquidacion f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, apellido_medique, especialidad, monto)
-	select
-	nro_liquidacion,
-	t.fecha,
-	t.nro_afiliade_consulta,
-	t.dni_paciente,
-	p.nombre,
-	p.apellido,
-	t.dni_medique,
-	m.nombre,
-	m.apellido,
-	m.especialidad,
-	t.monto-obra_social
-	from
-	turno t,
-	paciente p,
-	medique m
-	where
-	t.nro_obra_social_consulta = _nro_obra_social
-	and t.fecha between _desde and _hasta;
+		insert into liquidacion_detalle (nro_liquidacion f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, apellido_medique, especialidad, monto)
+		select
+		nro_liquidacion,
+		t.fecha,
+		t.nro_afiliade_consulta,
+		t.dni_paciente,
+		p.nombre,
+		p.apellido,
+		t.dni_medique,
+		m.nombre,
+		m.apellido,
+		m.especialidad,
+		t.monto-obra_social
+		from
+		turno t,
+		paciente p,
+		medique m
+		where
+		t.nro_obra_social_consulta = _nro_obra_social
+		and t.fecha between _desde and _hasta;
 
 
-	select sum(monto) into total_liquidacion
-	from liquidacion_detalle
-	where nro_liquidacion = nro_liquidacion;
+		select sum(monto) into total_liquidacion
+		from liquidacion_detalle
+		where nro_liquidacion = nro_liquidacion;
 
-	update liquidacion_cabecera
-	set total = total_liquidacion
-	where nro_liquidacion = nro_liquidacion,
+		update liquidacion_cabecera
+		set total = total_liquidacion
+		where nro_liquidacion = nro_liquidacion,
 
 	end;
 	$$ lagnguage plpgsql;
