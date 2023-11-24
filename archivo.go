@@ -26,7 +26,7 @@ func main() {
 		fmt.println("6. Mostrar base de datos no relacioanl")
 		fmt.println("7. Eliminar PKs y FKs")
 		fmt.println("8. Crear sp y triggers")
-		fmt.println("9. Ejecutar sp")
+		fmt.println("9. Generar turnos por mes")
 		fmt.println("10. Ejecutar sp1")
 		fmt.println("11. Ejecutar sp2")
 		fmt.println("12. Ejecutar sp3")
@@ -57,6 +57,16 @@ func main() {
 			case opcion == 8:
 				crearSP()
 				crearTriggers()
+			case opcion == 9:
+				var anio int
+				var mes int
+				
+				fmt.print("Ingrese el año a generar turnos: ")
+				fmt.Scanf("%d", &anio)
+				fmt.print("Ingrese el mes a generar turnos: ")
+				fmt.Scanf("%d", &mes)
+				
+				generarTurnos(int anio, int mes)
 			case opcion == 15:
 				fmt.println("Adios!")
 			default:
@@ -838,9 +848,22 @@ create or replace function email_cancelacion() returns trigger as $$
 
 	if err != nil {
 		log.Fatal(err)
-
 	}
 }
+
+func generarTurnos(anio, mes int) {
+	db, err := dbConnection()
+	if err != nil {
+
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	_, err = dbExec(`
+		select generarTurnos($1,$2);
+	`)
+}
+
 
 //Comienzo json
 type Paciente struct {
