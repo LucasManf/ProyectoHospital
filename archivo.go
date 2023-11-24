@@ -150,14 +150,14 @@ func main() {
 					return
 			
 			    generarLiquidacionObrasSociales(nro_obra_social, f_desde, f_hasta)                 	
-			case opcion == 16:
-				fmt.Println("Adios!")
-			default:
-				fmt.Println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
+				case opcion == 16:
+					fmt.Println("Adios!")
+				default:
+					fmt.Println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
+			}
 		}
+		fmt.Println("El programa se finalizo correctamente.")
 	}
-	fmt.Println("El programa se finalizo correctamente.")
-}
 }
 
 func dbConnection()(*sql.DB, error){
@@ -945,6 +945,7 @@ func generarTurnos(_anio int, _mes int) {
 	_, err = dbExec(`
 		select generarTurnos($1,$2);
 	`)
+}
 	
 func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
 	db, err := dbConnection()
@@ -956,6 +957,7 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.T
 	_, err = dbExec(`
 		select reservar_turno($1, $2, $3);
 	`)
+}
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	db, err := dbConnection()
@@ -967,7 +969,7 @@ func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	_, err = dbExec(`
 		select cancelacion_turnos($1, $2, $3);
 	`)
-	
+}
 func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
 	if err != nil {
@@ -978,6 +980,7 @@ func atencionTurnos(_nro_turno int) {
 	_, err = dbExec(`
 		select atencion_turnos($1);
 	`)	
+}
 	
 func emailRecordatorio() {
 	db, err := dbConnection()
@@ -989,6 +992,8 @@ func emailRecordatorio() {
 	_, err = dbExec(`
 		select email_recordatorio();
 	`)	
+}	
+
 func emailPerdidaTurno() 	{
 	db, err := dbConnection()
 	if err != nil {
@@ -999,6 +1004,7 @@ func emailPerdidaTurno() 	{
 	_, err = dbExec(`
 		select email_perdida_turno();
 	`)	
+}
 
 func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _hasta time.Time)	{
 	db, err := dbConnection()
