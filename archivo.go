@@ -408,6 +408,7 @@ func generarTurnos() {
 		create or replace function generar_turnos(_anio int, _mes int) returns boolean as $$
 		declare
 			fechas_generadas timestamp[];
+			horas_generadas time[];
 			
 		begin
 			//verificar si los turnos ya existen
@@ -425,28 +426,41 @@ func generarTurnos() {
 				) :: timestamp as dias
 			) into fechas_generadas;
 			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 1;
+			select array (
+				for i in select distinct(a.dia) from agenda a loop
+					select date_add(hora_desde);
+					select date_add(hora_desde, interval 1 hour);
+					select date_add(hora_desde, interval 2 hour);
+					select date_add(hora_desde, interval 3 hour);
+					select date_add(hora_desde, interval 4 hour);
+					select date_add(hora_desde, interval 5 hour);
+					select date_add(hora_desde, interval 6 hour);
+					select date_add(hora_desde, interval 7 hour);
+				end loop;
+			) into horas_generadas;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 2;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 1 where horas_generadas = a.hora_desde;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 3;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 2 where horas_generadas = a.hora_desde;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 4;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 3 where horas_generadas = a.hora_desde;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 5;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 4 where horas_generadas = a.hora_desde;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 6;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 5 where horas_generadas = a.hora_desde;
 			
 			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 7;
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 6 where horas_generadas = a.hora_desde;
 			
+			insert into turno (fecha, dni_medique)
+			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 7 where horas_generadas = a.hora_desde;
 			
+			return true;
 		end;
 		$$ language plpgsql;
 	`)
