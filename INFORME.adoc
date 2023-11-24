@@ -10,55 +10,67 @@ v1, {docdate}. Docente Hernan Rondelli (COM-08)
 
 El trabajo practico como reemplazo del segundo parcial de la materia "Base de datos II"
 
-consiste en la creacion de una base de datos relacional sql y otra no relacional en json (utilizando librerias de boltdb); sobre un hospital.
+consiste en la creacion de una base de datos relacional sql (utilizando la libreria pq) 
 
-Ambas seran ejecutadas mediante un programa en lenguaje go y deberan de incluir informacion de pacientes, medicos,
+y otra no relacional en json (con la libreria de boltdb); sobre un hospital.
 
-turnos, obras sociales y consultorios, entre otras cosas. La base de datos sql debera contar con distintos 
+Ambas seran ejecutadas mediante un programa en lenguaje go. La base de datos sql debera contar con distintos 
 
 Stored Procedures y triggers como: 
 
-- Stored Procedures y triggers: 
-* Generacion de turnos disponibles. 
-* Reservas de turnos. 
-* Cancelacion de turnos.
-* Atencion de turnos.
-* Liquidacion para obras sociales.
-* Envio de mails a pacientes.
+-Stored Procedures y triggers: 
+*Generacion de turnos disponibles. 
+*Reservas de turnos. 
+*Cancelacion de turnos.
+*Atencion de turnos.
+*Liquidacion para obras sociales.
+*Envio de mails a pacientes.
 
+-Tablas a crear para la db SQL:
+*Pacientes.
+*Mediques.
+*Consultorios.
+*Agendas.
+*Turnos.
+*Reprogramaciones.
+*Errores.
+*Coberturas.
+*Obras sociales.
+*Liquidaciones cabecera.
+*Liquidaciones detalle.
+*Envios email.
 
 == Descripción
 
-//En esta sección pueden incluirse las dificultades que tuvieron, las
-//soluciones encontradas, las decisiones que se fueron tomando a lo largo
-//del trabajo práctico, y las cuestiones de diseño que consideren
-//importantes.
+Dividimos las tareas entre los integrantes del grupo para poder entender  
 
-//También, se puede incluir una descripción general del programa—cómo
-//funciona.
+cada uno, los distintos tipos de escritura, haciendo que uno se ocupe 
 
+del json, otro del asciidoc y entre todos pusimos de nuestra parte para completar el archivo de 
+
+go (postgres), y en especial la implementacion de las ditintas librerias nuevas trabajadas.
+ 
+
+Lo primero que hicimos fue crear la base de datos sql por fuera de go. Esto sirvio para podeer
+
+visualizar mejor como iba a funcionar nuestro sistema, las keys que ibamos a necesitar y 
+
+poder probar los distintos triggers y stored procedures.
 
 A traves de este trabajo nos encontramos con distintos obstaculos. 
 
 Muchos de estos se debieron a la poca experiencia en los lenguajes 
 
-que debian de ser utilizados tanto en json, go y asciidoc. 
+que debian de ser utilizados tanto en json y go. 
 
-Dividimos las tareas entre los integrantes del grupo para poder entender  
-
-cada uno, los distintos tipos de escritura, haciendo que uno ocupe 
-
-del json, otro del asciidoc y entre todos pusimos de nuestra parte para completar el archivo de 
-
-go (postgres), y en especial la implementacion de las ditintas librerias nuevas trabajadas. 
-
-Tambien algunos de nosotros tuvimos problemas con entender GitLab y como conectarse 
-
-ya sea desde el git bash como desde la virtual machine de alpine. 
 
 Uno de los mayores obstaculos que tuvimos fueron los Stored procedures 
 
 los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sintaxis. 
+
+Consideramos que algunos de esos eran demasiado complejos para nuestros conocimientos y 
+
+termiamos atrasandonos demasiado.
 
 
 Al final hicimos todo lo que pudimos, creando la base de datos con todas sus tablas y sus atributos; 
@@ -73,26 +85,73 @@ y las difrerencias con las ya trabajadas en clase.
 
 == Implementación
 
-//En esta sección se incluye el código fuente correctamente formateado—y
-//comentado, si corresponde.
-
-=== Aqui esta el codigo de ambas tamblas (Relcional y noRelacional)
-
+.Codigo para manejar los errores de go
 [source, go]
 ----
-include::archivo.go[]
+if err != nil {
+		log.Fatal(err)
+	}
+----
+
+.Conexion a una base de datos sql por postgres
+[source, go]
+----
+func dbConnection()(*sql.DB, error){
+    db, err := sql.Open("postgres", "user=postgres host=localhost dbname=Hospital sslmode=disable")
+	if err != nil{
+       log.Fatal(err)
+	}
+	return db, nil
+}
+----
+
+.Creación de la base de datos llamada hospital
+[source, go]
+----
+func crearDB() {
+	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=postgres sslmode=disable")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	_, err = db.Exec("create DATABASE Hospital")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+----
+
+.Descubrimos esta manera de pasar un string de una fecha pasada por el usuario a un time.Time
+[source, go]
+----
+t, err := time.Parse("2006-01-02 15:04:05", fecha_turno)
+if err != nil {
+	fmt.Println("Error al parsear la fecha y hora:", err)
+	return
+}		
+----
+
+.Lectura de un bucket de bytes de un archivo db para poder mostrarlo en go
+[source, go]
+----
+func ReadUnique(db *bolt.DB, bucketName string, key []byte) ([]byte, error) {
+    var buf []byte
+
+    // abre una transacción de lectura
+    err := db.View(func(tx *bolt.Tx) error {
+        b := tx.Bucket([]byte(bucketName))
+        buf = b.Get(key)
+        return nil
+    })
+
+    return buf, err
+}
 ----
 
 	
 == Conclusiones
 
-//Aquí van algunas reflexiones acerca del proceso de desarrollo del
-
-//trabajo realizado, y de los resultados obtenidos.
-
-//También se puede incluir una conclusión final de producto terminado.
-
-//Pueden incluirse lecciones aprendidas durante el desarrollo del trabajo.
 
 Durante el desarrollo de esta aplicación pudimos llegar a distintos aprendizajes cada uno, como lo  
 
@@ -106,5 +165,5 @@ Tambien aprendimos como es la experiencia de la creacion de una base de datos ta
 
 por lo menos comparandola con lo que habiamos trabajado previamente en la cursada, y lograr que esta pueda 
 
-pasar varias de las pruebas exigidas por este TP. 
+pasar varias de las pruebas exigidas por este TP.
 

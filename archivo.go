@@ -413,14 +413,12 @@ func crearSP() {
 		log.Fatal(err)
 
     }
-	
 	reservarTurno()
 	cancelarTurno()
 	atencionTurno()
     emailRecordatorioSP()
     emailPerdidaSP()
 	liquidacionObrasSociales()
-	
 	}
 
 func crearTriggers() {
@@ -557,7 +555,7 @@ func generarTurnos() {
 		end;
 		$$ language plpgsql;
 	`)
-	}
+}
 
 func reservarTurno() {
 
@@ -878,7 +876,6 @@ func emailsTrigger() {
 
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
@@ -944,7 +941,7 @@ func generarTurnos(_anio int, _mes int) {
 
 	_, err = dbExec(`
 		select generarTurnos($1,$2);
-	`)
+	`, _anio, _mes)
 }
 	
 func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
@@ -956,7 +953,7 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.T
 
 	_, err = dbExec(`
 		select reservar_turno($1, $2, $3);
-	`)
+	`, _nro_paciente, _dni_medique, _fecha_hora_turno)
 }
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
@@ -968,7 +965,7 @@ func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 
 	_, err = dbExec(`
 		select cancelacion_turnos($1, $2, $3);
-	`)
+	`, _dni_medique, _fdesde, _fhasta)
 }
 func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
@@ -979,7 +976,7 @@ func atencionTurnos(_nro_turno int) {
 
 	_, err = dbExec(`
 		select atencion_turnos($1);
-	`)	
+	`, _nro_turno)	
 }
 	
 func emailRecordatorio() {
@@ -994,7 +991,7 @@ func emailRecordatorio() {
 	`)	
 }	
 
-func emailPerdidaTurno() 	{
+func emailPerdidaTurno() {
 	db, err := dbConnection()
 	if err != nil {
 		log.Fatal(err)
@@ -1015,7 +1012,7 @@ func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _ha
 
 	_, err = dbExec(`
 		select generar_liquidacion_obras_sociales($1, $2, $3);
-	`)	
+	`, _nro_obra_social, _desde, _hasta)	
 	
 }
 
