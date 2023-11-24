@@ -413,14 +413,12 @@ func crearSP() {
 		log.Fatal(err)
 
     }
-	
 	reservarTurno()
 	cancelarTurno()
 	atencionTurno()
     emailRecordatorioSP()
     emailPerdidaSP()
 	liquidacionObrasSociales()
-	
 	}
 
 func crearTriggers() {
@@ -557,7 +555,7 @@ func generarTurnos() {
 		end;
 		$$ language plpgsql;
 	`)
-	}
+}
 
 func reservarTurno() {
 
@@ -878,7 +876,6 @@ func emailsTrigger() {
 
 	db, err := dbConnection()
 	if err != nil {
-
 		log.Fatal(err)
 	}
 	defer db.Close()
