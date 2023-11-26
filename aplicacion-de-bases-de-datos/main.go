@@ -508,38 +508,38 @@ func sp_generarTurnos() {
 				_fecha date;
 				_agenda record;
 				fecha_completa timestamp;
-				resultado bool;
 		begin
 			--verificar si los turnos ya existen
 			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
 			
 			if found then
 				raise notice 'Los turnos para esas fechas ya fueron generados';
-				resultado = false;
-				return resultado;
+				return false;
 			end if;
 			
-			resultado = true;
-			for _agenda in select a.dia from agenda a loop
-				_fecha = to_date(concat(_anio, _mes, 1));
+			for _agenda in select * from agenda a loop
+				_fecha = to_date(_anio || '-' || _mes || '-' || 1, 'yyyy-mm-dd');
 				
 				while (extract(month from _fecha))::int = _mes loop
-					if extract(dow from _fecha) = _agenda.dia then
-						fecha_completa = _fecha || ' ' || _agenda.hora_desde;
+					if extract(dow from _fecha)::int = _agenda.dia then
+						fecha_completa = _fecha + _agenda.hora_desde;
 						
 						while fecha_completa::time < _agenda.hora_hasta loop
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
 							from turno 
 							where turno.fecha = fecha_completa and turno.dni_medique = _agenda.dni_medique;
+							
+							fecha_completa = fecha_completa + _agenda.duracion_turno;
 						end loop;
-					end if;					
-					fecha_completa = fecha_completa + _agenda.duracion_turno;
+					end if;			
+					
+					_fecha = _fecha + 1;
 				end loop;
 			end loop;
 			raise notice 'Los turnos fueron generados';
-			return resultado;
-		commit;	
+			return true;
+
 		end;
 		$$ language plpgsql;
 	`)
