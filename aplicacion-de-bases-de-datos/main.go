@@ -174,14 +174,17 @@ func crearDB() {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("create DATABASE hospital")
-
+	_, err = db.Exec("drop database if exists hospital")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+	_, err = db.Exec("create database hospital")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Base de datos creada exitosamente.")
 }
-
 
 // crear tablas
 func createTables() {
@@ -499,21 +502,24 @@ func sp_generarTurnos() {
 	defer db.Close()
 
 	_, err = db.Exec(`
-		create or replace function generar_turnos(_anio int, _mes int) returns boolean as $$
+		create or replace function generar_turnos(_anio int, _mes int) returns bool as $$
 		declare
 				aux record;
 				_fecha date;
 				_agenda record;
 				fecha_completa timestamp;
+				resultado bool;
 		begin
 			--verificar si los turnos ya existen
 			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
 			
 			if found then
 				raise notice 'Los turnos para esas fechas ya fueron generados';
-				return false;
+				resultado = false;
+				return resultado;
 			end if;
 			
+			resultado = true;
 			for _agenda in select a.dia from agenda a loop
 				_fecha = to_date(concat(_anio, _mes, 1));
 				
@@ -532,7 +538,7 @@ func sp_generarTurnos() {
 				end loop;
 			end loop;
 			raise notice 'Los turnos fueron generados';
-			return true;
+			return resultado;
 		commit;	
 		end;
 		$$ language plpgsql;
@@ -922,7 +928,7 @@ func generarTurnos(_anio int, _mes int) {
 	defer db.Close()
 
 	_, err = db.Query(`
-		select generarTurnos($1,$2);
+		select generar_turnos($1,$2);
 	`, _anio, _mes)
 }
 	
