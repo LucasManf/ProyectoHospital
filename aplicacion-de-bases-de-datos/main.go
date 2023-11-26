@@ -518,7 +518,7 @@ func sp_generarTurnos() {
 			end if;
 			
 			for _agenda in select * from agenda a loop
-				_fecha = to_date(_anio || '-' || _mes || '-' || 1, 'yyyy-mm-dd');
+				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
 				
 				while (extract(month from _fecha))::int = _mes loop
 					if extract(dow from _fecha)::int = _agenda.dia then
