@@ -503,7 +503,7 @@ func generarTurnos() {
 				_agenda record;
 				fecha_completa timestamp;
 		begin
-			//verificar si los turnos ya existen
+			--verificar si los turnos ya existen
 			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
 			
 			if found then
@@ -512,16 +512,17 @@ func generarTurnos() {
 			end if;
 			
 			for _agenda in select a.dia from agenda a loop
-				_fecha = to_date(concat(_anio, _mes, 1))
+				_fecha = to_date(concat(_anio, _mes, 1));
 				
 				while (extract(month from _fecha))::int = _mes loop
 					if extract(dow from _fecha) = _agenda.dia then
 						fecha_completa = _fecha || ' ' || _agenda.hora_desde;
 						
 						while fecha_completa::time < _agenda.hora_hasta loop
-							insert into turno  (fecha, nro_consultorio, dni_medique, estado)
-							values(fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible')
-							where t.fecha = fecha_completa and t.dni_medique = _agenda.dni_medique into aux
+							insert into turno (fecha, nro_consultorio, dni_medique, estado)
+							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
+							from turno 
+							where turno.fecha = fecha_completa and turno.dni_medique = _agenda.dni_medique;
 						end loop;
 					end if;					
 					fecha_completa = fecha_completa + _agenda.duracion_turno;
