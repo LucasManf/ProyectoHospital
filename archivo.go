@@ -498,11 +498,10 @@ func generarTurnos() {
 	_, err = dbExec(`
 		create or replace function generar_turnos(_anio int, _mes int) returns boolean as $$
 		declare
-			fechas_generadas timestamp[];
-			horas_generadas time[];
-			hora1 time;
-			hora2 time;
-			
+				aux record;
+				_fecha date;
+				_agenda record;
+				fecha_completa timestamp;
 		begin
 			//verificar si los turnos ya existen
 			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
@@ -512,51 +511,22 @@ func generarTurnos() {
 				return false;
 			end if;
 			
-			select array (
-				generate_series(
-					make_date(_anio, _mes, 01),
-					make_date(_anio, _mes + 1, 01) - interval '1 day', interval '1 day'
-				) :: timestamp as dias
-			) into fechas_generadas;
-			
-			for i in select distinct(a.dia) from agenda a loop
-				for j in  loop
-					
+			for _agenda in select a.dia from agenda a loop
+				_fecha = to_date(concat(_anio, _mes, 1))
+				
+				while (extract(month from _fecha))::int = _mes loop
+					if extract(dow from _fecha) = _agenda.dia then
+						fecha_completa = _fecha || ' ' || _agenda.hora_desde;
+						
+						while fecha_completa::time < _agenda.hora_hasta loop
+							insert into turno  (fecha, nro_consultorio, dni_medique, estado)
+							values(fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible')
+							where t.fecha = fecha_completa and t.dni_medique = _agenda.dni_medique into aux
+						end loop;
+					end if;					
+					fecha_completa = fecha_completa + _agenda.duracion_turno;
 				end loop;
 			end loop;
-			
-				for dia in select distinct(a.dia) from agenda a loop
-					select date_add(hora_desde) into horas_generadas;
-					select date_add(hora_desde, interval 1 hour) into horas_generadas;
-					select date_add(hora_desde, interval 2 hour) into horas_generadas;
-					select date_add(hora_desde, interval 3 hour) into horas_generadas;
-					select date_add(hora_desde, interval 4 hour) into horas_generadas;
-					select date_add(hora_desde, interval 5 hour) into horas_generadas;
-					select date_add(hora_desde, interval 6 hour) into horas_generadas;
-					select date_add(hora_desde, interval 7 hour) into horas_generadas;
-				end loop;
-			
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 1 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 2 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 3 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 4 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 5 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 6 where horas_generadas = a.hora_desde;
-			
-			insert into turno (fecha, dni_medique)
-			select fechas_generadas.dias + horas_generadas, a.dni_medique from agenda a where extract(isodow from dias.fechas_generadas) = a.dia and a.dia = 7 where horas_generadas = a.hora_desde;
 			
 			return true;
 		end;
@@ -658,10 +628,8 @@ func reservarTurno() {
 			and fecha = _fecha_turno
 			and hora = _hora_turno
 			and estado = 'Disponible';
-			return true;
-			end;
-
 			
+			return true;
 		end;
 		$$ language plpgsql;
 
