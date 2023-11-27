@@ -505,12 +505,14 @@ func sp_generarTurnos() {
 		create or replace function generar_turnos(_anio int, _mes int) returns bool as $$
 		declare
 				aux record;
+				aux1 record;
 				_fecha date;
 				_agenda record;
 				fecha_completa timestamp;
 		begin
+
 			--verificar si los turnos ya existen
-			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes;
+			select * from turno t where extract(year from t.fecha) = _anio and extract(month from t.fecha) = _mes into aux1;
 			
 			if found then
 				raise notice 'Los turnos para esas fechas ya fueron generados';
@@ -518,17 +520,16 @@ func sp_generarTurnos() {
 			end if;
 			
 			for _agenda in select * from agenda a loop
-				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
-				
+				_fecha = to_date(concat(_anio,_mes,1), 'yyyymmdd');
+								
 				while (extract(month from _fecha))::int = _mes loop
 					if extract(dow from _fecha)::int = _agenda.dia then
 						fecha_completa = _fecha + _agenda.hora_desde;
-						
+				
 						while fecha_completa::time < _agenda.hora_hasta loop
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
-							from turno 
-							where turno.fecha = fecha_completa and turno.dni_medique = _agenda.dni_medique;
+
 							
 							fecha_completa = fecha_completa + _agenda.duracion_turno;
 						end loop;
@@ -888,7 +889,7 @@ create or replace function email_reserva() returns trigger as $$
 	$$ language plpgsql;
 	
 	create trigger trigger_email_reserva
-	after insert on turno
+	after update on turno
 	for each row
 	execute function email_reserva();
 	
