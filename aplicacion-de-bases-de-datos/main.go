@@ -212,8 +212,8 @@ func createTables() {
 		create table error (nro_error serial, f_turno timestamp, nro_consultorio int, dni_medique int, nro_paciente int, operacion char(12), f_error timestamp, motivo varchar(64));
 		create table cobertura (dni_medique int, nro_obra_social int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2));
 		create table obra_social (nro_obra_social int, nombre text, contacto_nombre text, contacto_apellido text, contacto_telefono char(12), contacto_email text);
-		create table liquidacion_cabecera (nro_liquidacion int, nro_obra_social int, desde date, hasta date, total decimal(15,2));
-		create table liquidacion_detalle (nro_liquidacion int, nro_linea int, f_atencion date, nro_afiliade int, dni_paciente int, nombre_paciente text, apellido_paciente text, dni_medique int, nombre_medique text, apellido_medique text, especialidad varchar(64), monto decimal(12,2));
+		create table liquidacion_cabecera (nro_liquidacion serial, nro_obra_social int, desde date, hasta date, total decimal(15,2));
+		create table liquidacion_detalle (nro_liquidacion serial, nro_linea serial, f_atencion date, nro_afiliade int, dni_paciente int, nombre_paciente text, apellido_paciente text, dni_medique int, nombre_medique text, apellido_medique text, especialidad varchar(64), monto decimal(12,2));
 		create table envio_email (nro_email serial, f_generacion timestamp, email_paciente text, asunto text, cuerpo text, f_envio timestamp, estado char(10));
 		create table solicitud_reservas (nro_orden int, nro_paciente int, dni_medique int, fecha date, hora time);
 		`)
@@ -849,48 +849,50 @@ func sp_liquidacionObrasSociales() {
 	_, err = db.Exec(`
 	create or replace function generar_liquidacion_obras_sociales(_nro_obra_social int, _desde DATE, _hasta DATE) returns void as $$
 	declare 
-		total_liquidacion float := 0.0;
-		nro_liquidacion int;
+		total_liquidacion float;
+		_nro_liquidacion int;
 	begin
+		total_liquidacion := 0.0;
+	
 		insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
 		values(_nro_obra_social, _desde, _hasta, total_liquidacion)
-		returning nro_liquidacion into nro_liquidacion;
+		returning nro_liquidacion into _nro_liquidacion;
 
 		update turno
 		set estado = 'liquidado'
 		where nro_obra_social_consulta = _nro_obra_social
 		and fecha between _desde and _hasta;
 
-		insert into liquidacion_detalle (nro_liquidacion, f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, apellido_medique, especialidad, monto)
+		insert into liquidacion_detalle (nro_liquidacion, f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, nombre_medique, apellido_medique, especialidad, monto)
 		select
-		nro_liquidacion,
+		_nro_liquidacion,
 		t.fecha,
 		t.nro_afiliade_consulta,
-		t.dni_paciente,
+		p.dni_paciente,
 		p.nombre,
 		p.apellido,
 		t.dni_medique,
 		m.nombre,
 		m.apellido,
 		m.especialidad,
-		t.monto-obra_social
+		t.monto_obra_social
 		from
 		turno t,
 		paciente p,
 		medique m
 		where
 		t.nro_obra_social_consulta = _nro_obra_social 
-		and t.dni_paciente = p.dni_paciente
+		and t.nro_paciente = p.nro_paciente
 		and t.dni_medique = m.dni_medique
 		and t.fecha between _desde and _hasta;
 
 		select sum(monto) into total_liquidacion
 		from liquidacion_detalle
-		where nro_liquidacion = nro_liquidacion;
+		where nro_liquidacion = _nro_liquidacion;
 
 		update liquidacion_cabecera
 		set total = total_liquidacion
-		where nro_liquidacion = nro_liquidacion;
+		where nro_liquidacion = _nro_liquidacion;
 
 	end;
 	$$ language plpgsql;
