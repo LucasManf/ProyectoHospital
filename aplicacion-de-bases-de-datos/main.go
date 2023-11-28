@@ -571,14 +571,14 @@ func sp_generarTurnos() {
 				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
 								
 				while (extract(month from _fecha))::int = _mes loop
-					if extract(isodow from _fecha)::int = _agenda.dia then
+					if extract(dow from _fecha)::int = _agenda.dia then
 						fecha_completa = _fecha + _agenda.hora_desde;
 				
 						while fecha_completa::time < _agenda.hora_hasta loop
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
 							from agenda
-							where agenda.dni_medique = _agenda.dni_medique and agenda.dia = extract(isodow from fecha_completa);
+							where agenda.dni_medique = _agenda.dni_medique;
 							
 							fecha_completa = fecha_completa + _agenda.duracion_turno;
 
@@ -606,17 +606,19 @@ func sp_reservarTurno() {
 	 defer db.Close()
 
 	_, err = db.Exec(`
-		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_hora_turno timestamp) returns boolean as $$
+		create or replace function reservar_turno(_nro_paciente int, _dni_medique int, _fecha_turno date, _hora_turno time) returns boolean as $$
 
 		declare
 			obrasocial_datos record;
 			paciente_datos record;
 			cantidad_turnos_reservados int;
 			condicion boolean;
+			fecha_completa timestamp;
+			aux record;
 
 		begin
 			
-			// verificar su el dni del medique existe
+			-- verificar su el dni del medique existe
 			select m.dni_medique from medique m where m.dni_medique = _dni_medique;
 			
 			if not found then
@@ -627,7 +629,7 @@ func sp_reservarTurno() {
 			end if;
 			
 
-			// verificar si el numero de historia clinica existe
+			-- verificar si el numero de historia clinica existe
 			select p.nro_paciente from paciente p where p.nro_paciente = _nro_paciente;
 			
 			if not found then
@@ -637,18 +639,18 @@ func sp_reservarTurno() {
 				return false;
 			end if;
 			
-			// verificar si el paciente tiene una obra social y obtener la obra social
+			-- verificar si el paciente tiene una obra social y obtener la obra social
 			condicion := false;
-			select p.nro_obra_social from paciente p, obra social o where p.nro_obra_social = o.nro_obra_social into paciente_datos;
+			select p.nro_obra_social from paciente p, obra_social o where p.nro_obra_social = o.nro_obra_social into paciente_datos;
 			
 			if found then
 				condicion := true;
 			end if;
 			
-			// verificar si el medique atiende esa obra social
+			-- verificar si el medique atiende esa obra social
 			case
 				when condicion then
-					select * from cobertura p, obra_social o where c.dni_medique = _dni_medique and c.nro_obra_social = paciente_datos.nro_obra_social;
+					select * from cobertura p, obra_social o where c.dni_medique = _dni_medique and c.nro_obra_social = paciente_datos.nro_obra_social into aux;
 					
 					if not found then
 						insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -658,9 +660,10 @@ func sp_reservarTurno() {
 					end if;
 			end case;
 			
-			// verificar si el turno esta disponible
+			-- verificar si el turno esta disponible
+			fecha_completa = _fecha_turno + _hora_turno;
 			
-			select nro_turno from turno t where t.fecha = _fecha_hora_turno and t.dni_medique = _dni_medique and estado = 'disponible'
+			select nro_turno from turno t where t.fecha = fecha_completa and t.dni_medique = _dni_medique and estado = 'disponible' into aux;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -669,7 +672,7 @@ func sp_reservarTurno() {
 				return false;
 			end if;
 			
-			// verificar si el paciente ha superado el limite de 5 turnos en estado reservado
+			-- verificar si el paciente ha superado el limite de 5 turnos en estado reservado
 			select count(*) from turno where nro_paciente = _nro_paciente and estado = 'Reservado' into cantidad_turnos_reservados ;
 
 			if cantidad_turnos_reservados >= 5 then
@@ -679,7 +682,7 @@ func sp_reservarTurno() {
 				return false;
 			end if;
 			
-			// realizar la reserva del turno
+			-- realizar la reserva del turno
 			update turno
 			set
 			nro_paciente = _nro_paciente,
@@ -693,9 +696,9 @@ func sp_reservarTurno() {
 			and estado = 'Disponible';
 			
 			return true;
-		commit;	
 		end;
 		$$ language plpgsql;
+
 
 	`)
 }
@@ -982,10 +985,6 @@ func generarTurnos(_anio int, _mes int) {
 	_, err = db.Query(`
 		select generar_turnos($1,$2);
 	`, _anio, _mes)
-	
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 	
 func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
@@ -998,9 +997,6 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.T
 	_, err = db.Query(`
 		select reservar_turno($1, $2, $3);
 	`, _nro_paciente, _dni_medique, _fecha_hora_turno)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
@@ -1013,9 +1009,6 @@ func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	_, err = db.Query(`
 		select cancelacion_turnos($1, $2, $3);
 	`, _dni_medique, _fdesde, _fhasta)
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
@@ -1027,9 +1020,6 @@ func atencionTurnos(_nro_turno int) {
 	_, err = db.Query(`
 		select atencion_turnos($1);
 	`, _nro_turno)	
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 	
 func emailRecordatorio() {
@@ -1054,9 +1044,6 @@ func emailPerdidaTurno() {
 	_, err = db.Query(`
 		select email_perdida_turno();
 	`)	
-	if err != nil {
-		log.Fatal(err)
-	}
 }
 
 func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _hasta time.Time)	{
@@ -1068,11 +1055,7 @@ func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _ha
 
 	_, err = db.Query(`
 		select generar_liquidacion_obras_sociales($1, $2, $3);
-	`, _nro_obra_social, _desde, _hasta)
-	
-	if err != nil {
-		log.Fatal(err)
-	}	
+	`, _nro_obra_social, _desde, _hasta)	
 	
 }
 
