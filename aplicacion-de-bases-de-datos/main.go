@@ -1,39 +1,32 @@
 package main
 
 import (
-	"encoding/json"
     "fmt"
     "time"
-    bolt "go.etcd.io/bbolt"
-    "strconv"
 	"log"
 	"database/sql"
-	"github.com/lib/pq"
+	_"github.com/lib/pq"
 )
 
-func main() {
-	_ = pq.QuoteIdentifier("some_text")
-	
+func main() {	
 	var opcion int
 	
-	for opcion != 16 {
+	for opcion != 14 {
 		fmt.Println("Elegi una opcion:")
 		fmt.Println("1 Crear BD")
 		fmt.Println("2. Crear Tablas")
 		fmt.Println("3. Crear PKs y FKs")
 		fmt.Println("4. Cargar Tablas")
-		fmt.Println("5. Cargar base de datos no relacional")
-		fmt.Println("6. Mostrar base de datos no relacional")
-		fmt.Println("7. Eliminar PKs y FKs")
-		fmt.Println("8. Crear sp y triggers")
-		fmt.Println("9. Generar turnos por mes")
-		fmt.Println("10. Reservar turno")
-		fmt.Println("11. Cancelacion de turno")
-		fmt.Println("12. Atencion turno")
-		fmt.Println("13. Email recordatorio")
-		fmt.Println("14. Email perdida de turno")
-		fmt.Println("15. Generar liquidacion de obras sociales")
-		fmt.Println("16. Salir")
+		fmt.Println("5. Eliminar PKs y FKs")
+		fmt.Println("6. Crear sp y triggers")
+		fmt.Println("7. Generar turnos por mes")
+		fmt.Println("8. Reservar turno")
+		fmt.Println("9. Cancelacion de turno")
+		fmt.Println("10. Atencion turno")
+		fmt.Println("11. Email recordatorio")
+		fmt.Println("12. Email perdida de turno")
+		fmt.Println("13. Generar liquidacion de obras sociales")
+		fmt.Println("14. Salir")
 		fmt.Print("Ingrese una opcion: ")
 		fmt.Scanf("%d", &opcion)
 
@@ -48,16 +41,12 @@ func main() {
 			case opcion == 4:
 				cargarTablas()
 			case opcion == 5:
-				cargarDatosJson()
-			case opcion == 6:
-				mostrarDatosJson()
-			case opcion == 7:
 				eliminarFk()
 				eliminarPK()
-			case opcion == 8:
+			case opcion == 6:
 				crearSP()
 				crearTriggers()
-			case opcion == 9:
+			case opcion == 7:
 				var anio int
 				var mes int
 				
@@ -67,7 +56,7 @@ func main() {
 				fmt.Scanf("%d", &mes)
 				
 				generarTurnos(anio, mes)
-			case opcion == 10:
+			case opcion == 8:
 				var (
 					nro_paciente int
 					dni_medique int
@@ -80,23 +69,23 @@ func main() {
 				fmt.Scanf("%d", &dni_medique)
 				fmt.Print("Ingresa una fecha para el turno (formato: yyyy-mm-dd): ")
 				fmt.Scan(&fecha_turno)
-				fmt.Print("Ingresa una hora para el turno (formato: HH:MM:SS): ")
+				fmt.Print("Ingresa una hora para el turno (formato: HH:MM): ")
 				fmt.Scan(&hora_turno)
 				
 				fecha, err := time.Parse("2006-01-02", fecha_turno)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha:", err)
+					fmt.Println("Error al parsear la fecha: ", err)
 					return
 				}		
 				
-				hora, err := time.Parse("15:04:05", hora_turno)
+				hora, err := time.Parse("15:04", hora_turno)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha:", err)
+					fmt.Println("Error al parsear la hora: ", err)
 					return
 				}
 					
 			    reservarTurno(nro_paciente, dni_medique, fecha, hora)
-			case opcion == 11:
+			case opcion == 9:
 				var (
 					dni_medique int
 					f_desde string
@@ -112,28 +101,28 @@ func main() {
 						
 				td, err := time.Parse("2006-01-02", f_desde)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha y hora:", err)
+					fmt.Println("Error al parsear la fecha desde: ", err)
 					return
 				}			
 					
 				th, err := time.Parse("2006-01-02", f_hasta)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha y hora:", err)
+					fmt.Println("Error al parsear la fecha hasta: ", err)
 					return
 				}		
 								
 			    cancelacionTurnos(dni_medique, td, th)
-			case opcion == 12:
+			case opcion == 10:
 				var nro_turno int
 				fmt.Print("Ingrese el numero del turno: ")
 				fmt.Scanf("%d", &nro_turno)
 			
 			    atencionTurnos(nro_turno)
-			case opcion == 13:			
+			case opcion == 11:			
 			    emailRecordatorio()
-			case opcion == 14:
+			case opcion == 12:
 			    emailPerdidaTurno()
-			case opcion == 15:
+			case opcion == 13:
 				var (
 					nro_obra_social int
 					f_desde string
@@ -149,18 +138,18 @@ func main() {
 						
 				td, err := time.Parse("2006-01-02", f_desde)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha y hora:", err)
+					fmt.Println("Error al parsear la fecha inicial:", err)
 					return
 				}			
 					
 				th, err := time.Parse("2006-01-02", f_hasta)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha y hora:", err)
+					fmt.Println("Error al parsear la fecha final:", err)
 					return
 				}		
 				
 			    generarLiquidacionObrasSociales(nro_obra_social, td, th)                 	
-			case opcion == 16:
+			case opcion == 14:
 				fmt.Println("Adios!")
 			default:
 				fmt.Println("La opciòn ingresada no es vàlida, por favor ingrese ingrese otro numero.")
@@ -637,7 +626,7 @@ func sp_reservarTurno() {
 			-- verificar si el paciente ha superado el limite de 5 turnos en estado reservado
 			select count(*) from turno where nro_paciente = _nro_paciente and estado = 'Reservado' into cantidad_turnos_reservados ;
 
-			if cantidad_turnos_reservados >= 5 then
+			if cantidad_turnos_reservados > 5 then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
 				values (now(), null, null, null, 'reserva', now(), 'Supera el lìmite de reserva de turnos');
 				raise notice 'Supera el lìmite de reserva de turnos';
@@ -965,9 +954,16 @@ func generarTurnos(_anio int, _mes int) {
 	}
 	defer db.Close()
 
-	_, err = db.Query(`
+	var resultado bool
+	
+	err = db.QueryRow(`
 		select generar_turnos($1,$2);
-	`, _anio, _mes)
+	`, _anio, _mes).Scan(&resultado)
+	if err != nil {
+		log.Fatal(err)
+	}	
+	
+	fmt.Println("Resultado de la generación: ", resultado)
 }
 	
 func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_turno time.Time, _hora_turno time.Time)  {
@@ -977,9 +973,17 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_turno time.Time, 
 	}
 	defer db.Close()
 
-	_, err = db.Query(`
+	var resultado bool
+
+	err = db.QueryRow(`
 		select reservar_turno($1, $2, $3,$4);
-	`, _nro_paciente, _dni_medique, _fecha_turno, _hora_turno)
+	`, _nro_paciente, _dni_medique, _fecha_turno, _hora_turno).Scan(&resultado)
+	
+	if err != nil {
+		log.Fatal(err)
+	}	
+	
+	fmt.Println("Resultado de la reserva: ", resultado)
 }
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
@@ -989,9 +993,17 @@ func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	}
 	defer db.Close()
 
-	_, err = db.Query(`
+	var turnos_cancelados int
+
+	err = db.QueryRow(`
 		select cancelacion_turnos($1, $2, $3);
-	`, _dni_medique, _fdesde, _fhasta)
+	`, _dni_medique, _fdesde, _fhasta).Scan(&turnos_cancelados)
+	
+	if err != nil {
+		log.Fatal(err)
+	}	
+	
+	fmt.Println("Cantidad de turnos cancelados: ", turnos_cancelados)
 }
 func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
@@ -1000,9 +1012,16 @@ func atencionTurnos(_nro_turno int) {
 	}
 	defer db.Close()
 
-	_, err = db.Query(`
+	var atendido bool
+
+	err = db.QueryRow(`
 		select atencion_turnos($1);
-	`, _nro_turno)	
+	`, _nro_turno).Scan(&atendido)
+	if err != nil {
+		log.Fatal(err)
+	}	
+	
+	fmt.Println("Turno atendido: ", atendido)
 }
 	
 func emailRecordatorio() {
@@ -1041,251 +1060,3 @@ func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _ha
 	`, _nro_obra_social, _desde, _hasta)	
 	
 }
-
-//Comienzo json
-type Paciente struct {
-	NroPaciente int
-	Nombre string
-	Apellido string
-	DniPaciente int
-	FechaNacimiento string
-	NroObraSocial int
-	NroAfiliade int
-	Domicilio string
-	Telefono string
-	Email string
-}
-
-type Medique struct {
-	DniMedique int
-	Nombre string
-	Apellido string
-	Especialidad string
-	MontoConsultaPrivada float64
-	Telefono string
-}
-
-type Consultorio struct {
-	NroConsultorio int
-	Nombre string
-	Domicilio string
-	CodigoPostal int
-	Telefono string
-}
-
-type Turno struct {
-	NroTurno int
-	Fecha string
-	NroConsultorio int
-	DniMedique int
-	NroPaciente int
-	NroObraSocialConsulta int
-	NroAfiliadeConsulta int
-	MontoPaciente float64
-	MontoObraSocial float64
-	FechaReserva string
-	Estado string	
-}
-
-type ObraSocial struct {
-	NroObraSocial int
-	Nombre string
-	ContactoNombre string
-	ContactoApellido string
-	ContactoTelefono string
-	ContactoEmail string
-}
-
-func CreateUpdate(db *bolt.DB, bucketName string, key []byte, val []byte) error {
-    // abre transacción de escritura
-    tx, err := db.Begin(true)
-    if err != nil {
-        return err
-    }
-    defer tx.Rollback()
-
-    b, _ := tx.CreateBucketIfNotExists([]byte(bucketName))
-
-    err = b.Put(key, val)
-    if err != nil {
-        return err
-    }
-
-    // cierra transacción
-    if err := tx.Commit(); err != nil {
-        return err
-    }
-
-    return nil
-}
-
-func ReadUnique(db *bolt.DB, bucketName string, key []byte) ([]byte, error) {
-    var buf []byte
-
-    // abre una transacción de lectura
-    err := db.View(func(tx *bolt.Tx) error {
-        b := tx.Bucket([]byte(bucketName))
-        buf = b.Get(key)
-        return nil
-    })
-
-    return buf, err
-}
-
-func cargarDatosJson() {
-	//abrir db
-    db, err := bolt.Open("hospital.db", 0600, nil)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
-
-	//Ingreso datos
-	pacientes :=[]Paciente{
-		{NroPaciente: 1, Nombre: "Martin", Apellido: "Galvarini", DniPaciente: 42660991, FechaNacimiento: "2000-06-30", NroObraSocial: 1, NroAfiliade: 1, Domicilio: "Carlos Pellgrini 2436, Martinez", Telefono: "11 4416-3214", Email: "13.martingalva@gmail.com"},
-		{NroPaciente: 2, Nombre: "Lucas", Apellido: "Hombrefredi", DniPaciente: 43724987, FechaNacimiento: "2000-11-05", NroObraSocial: 2, NroAfiliade: 1, Domicilio: "Domingo de Acassuso 1121, La Lucila", Telefono: "11 4491-3211", Email: "luchetti@gmail.com"},
-		{NroPaciente: 3, Nombre: "Veronica", Apellido: "Suarez", DniPaciente: 40547321, FechaNacimiento: "1998-05-03", NroObraSocial: 3, NroAfiliade: 1, Domicilio: "Rivadavia 626, Belgrano", Telefono: "11 4498-4321", Email: "verosua@gmail.com"},
-	}
-    
-    mediques :=[]Medique{
-		{DniMedique: 398121041, Nombre: "Carlos", Apellido: "Bilardo", Especialidad: "Ginecologo", MontoConsultaPrivada: 1500.50, Telefono: "11 4312-4574"},
-		{DniMedique: 10456789, Nombre: "Juan", Apellido: "Gomez", Especialidad: "Cardiología", MontoConsultaPrivada: 15000.00, Telefono: "112533-1234"},
-		{DniMedique: 40342233, Nombre: "Maria", Apellido: "Lopez", Especialidad: "Dermatología", MontoConsultaPrivada: 12000.00, Telefono: "113453-5678"},
-		{DniMedique: 11442233, Nombre: "Laura", Apellido: "Martinez", Especialidad: "Neurología", MontoConsultaPrivada: 20000.00, Telefono: "118987-3456"},
-		{DniMedique:12459135, Nombre: "Alberto", Apellido: "Fuentes", Especialidad: "Pediatría", MontoConsultaPrivada: 16000.00, Telefono: "119374-8901"},
-	}
-	
-	consultorios :=[]Consultorio{
-		{NroConsultorio: 1, Nombre: "Favaloro", Domicilio: "Italia 231, Martinez", CodigoPostal: 1640, Telefono: "4799-4153"},
-		{NroConsultorio: 2, Nombre: "Santa Catalina", Domicilio: "Belgrano 2809, Benavidez", CodigoPostal: 1621, Telefono: "5952-1897"},
-		{NroConsultorio: 3, Nombre: "Las Acacias", Domicilio: "Marcelo 1393, Don Torcuato", CodigoPostal: 1611, Telefono: "6826-7027"},
-	}
-    
-    turnos :=[]Turno{
-		{NroTurno: 1, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-14", Estado: "reservado"},
-		{NroTurno: 2, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 10456789, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-10-09", Estado: "reservado"},
-		{NroTurno: 3, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 40342233, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 16000.00, MontoObraSocial: 10100.00, FechaReserva: "2023-09-01", Estado: "reservado"},
-		{NroTurno: 4, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-08-13", Estado: "reservado"},
-		{NroTurno: 5, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 11442233, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-04-14", Estado: "reservado"},
-		{NroTurno: 6, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 398121041, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-20", Estado: "reservado"},
-		{NroTurno: 7, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 12459135, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 14000.00, MontoObraSocial: 9900.00, FechaReserva: "2023-10-22", Estado: "reservado"},
-		{NroTurno: 8, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 11442233, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-11-14", Estado: "reservado"},
-		{NroTurno: 9, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 10456789, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-08-25", Estado: "reservado"},
-		{NroTurno: 10, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 11442233, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 20000.00, MontoObraSocial: 11000.00, FechaReserva: "2023-09-30", Estado: "reservado"},
-		{NroTurno: 11, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 12459135, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 14000.00, MontoObraSocial: 9900.00, FechaReserva: "2023-07-07", Estado: "reservado"},
-		{NroTurno: 12, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 398121041, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-07-30", Estado: "reservado"},
-		{NroTurno: 13, Fecha: "2023-11-23",	NroConsultorio: 1, DniMedique: 398121041, NroPaciente: 1, NroObraSocialConsulta: 1, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-12", Estado: "reservado"},
-		{NroTurno: 14, Fecha: "2023-11-24",	NroConsultorio: 2, DniMedique: 398121041, NroPaciente: 2, NroObraSocialConsulta: 2, NroAfiliadeConsulta: 1,	MontoPaciente: 15000.00, MontoObraSocial: 10000.00, FechaReserva: "2023-09-11", Estado: "reservado"},
-		{NroTurno: 15, Fecha: "2023-11-25",	NroConsultorio: 3, DniMedique: 10456789, NroPaciente: 3, NroObraSocialConsulta: 3, NroAfiliadeConsulta: 1,	MontoPaciente: 12000.00, MontoObraSocial: 9700.00, FechaReserva: "2023-09-18", Estado: "reservado"},
-		
-	}
-    
-    obras_sociales :=[]ObraSocial{
-		{NroObraSocial: 1, Nombre: "Galeno", ContactoNombre: "Gabriel", ContactoApellido: "Galindo", ContactoTelefono: "11 4414-44120", ContactoEmail: "galeno@info.com"},
-		{NroObraSocial: 2, Nombre: "Omint", ContactoNombre: "Felipe", ContactoApellido: "Luna", ContactoTelefono: "11 5624-1120", ContactoEmail: "omint@info.com"},
-		{NroObraSocial: 3, Nombre: "Hospital Italiano", ContactoNombre: "Roberto", ContactoApellido: "Perez", ContactoTelefono: "11 2855-9291", ContactoEmail: "hitaliano@info.com"},
-	}
-    
-    //Escritura de datos
-	for _, paciente:= range pacientes {
-		data, err := json.Marshal(paciente)
-		if err != nil {
-			log.Fatal(err)
-		}
-		CreateUpdate(db, "paciente", []byte(strconv.Itoa(paciente.NroPaciente)), data)
-	}
-	
-	fmt.Printf("Pacientes cargados correctamente.\n")
-	
-	for _, medique:= range mediques {
-		data, err := json.Marshal(medique)
-		if err != nil {
-			log.Fatal(err)
-		}
-		CreateUpdate(db, "medique", []byte(strconv.Itoa(medique.DniMedique)), data)
-	}
-	
-	fmt.Printf("Mediques cargados correctamente.\n")
-	
-	for _, consultorio:= range consultorios {
-		data, err := json.Marshal(consultorio)
-		if err != nil {
-			log.Fatal(err)
-		}
-		CreateUpdate(db, "consultorio", []byte(strconv.Itoa(consultorio.NroConsultorio)), data)
-	}
-	
-	fmt.Printf("Consultorios cargados correctamente.\n")
-	
-	for _, turno:= range turnos {
-		data, err := json.Marshal(turno)
-		if err != nil {
-			log.Fatal(err)
-		}
-		CreateUpdate(db, "turno", []byte(strconv.Itoa(turno.NroTurno)), data)
-	}
-	
-	fmt.Printf("Turnos cargados correctamente.\n")
-	
-	for _, obra_social:= range obras_sociales {
-		data, err := json.Marshal(obra_social)
-		if err != nil {
-			log.Fatal(err)
-		}
-		CreateUpdate(db, "obraSocial", []byte(strconv.Itoa(obra_social.NroObraSocial)), data)
-	}
-	
-	fmt.Printf("Obras sociales cargados correctamente.\n")
-}
-
-func mostrarDatosJson() {
-	//abrir db
-    db, err := bolt.Open("hospital.db", 0600, nil)
-    if err != nil {
-        log.Fatal(err)
-    }
-    defer db.Close()
-	/*
-	fmt.Printf("Pacientes:\n")
-	for _, p:= range paciente {
-		resultado, err := ReadUnique(db, "paciente", []byte(strconv.Itoa(p.NroPaciente)))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n", resultado)
-	} 
-	fmt.Printf("Mediques:\n")
-	for _, m:= range medique {
-		resultado, err := ReadUnique(db, "medique", []byte(strconv.Itoa(m.DniMedique)))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n", resultado)
-	} 
-	fmt.Printf("Consultorios:\n")
-	for _, c:= range consultorio {
-		resultado, err := ReadUnique(db, "consultorio", []byte(strconv.Itoa(c.NroConsultorio)))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n", resultado)
-	} 
-	fmt.Printf("Turnos:\n")
-	for _, t:= range turno {
-		resultado, err := ReadUnique(db, "turno", []byte(strconv.Itoa(t.NroTurno)))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n", resultado)
-	} 
-	fmt.Printf("Obras sociales::\n")
-	for _, os:= range obraSocial {
-		resultado, err := ReadUnique(db, "obraSocial", []byte(strconv.Itoa(os.NroObraSocial)))
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("%s\n", resultado)
-	}
-	*/ 
-}
-
