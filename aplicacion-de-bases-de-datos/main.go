@@ -659,7 +659,8 @@ func sp_reservarTurno() {
 				monto_paciente = datos_ob.monto_consulta_privada
 				where
 				turno.dni_medique = _dni_medique
-				and turno.fecha = fecha_completa;			
+				and turno.fecha = fecha_completa;
+			end if;			
 			
 			return true;
 		end;
