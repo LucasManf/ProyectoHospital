@@ -258,7 +258,7 @@ func createTables() {
 		create table agenda (dni_medique int, dia int, nro_consultorio int, hora_desde time, hora_hasta time, duracion_turno interval);
 		create table turno (nro_turno serial, fecha timestamp, nro_consultorio int, dni_medique int, nro_paciente int, nro_obra_social_consulta int, nro_afiliade_consulta int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2), f_reserva timestamp, estado char(10));
 		create table reprogramacion (nro_turno int, nombre_paciente text, apellido_paciente text, telefono_paciente char(12), email_paciente text, nombre_medique text, apellido_medique text, estado char(12));
-		create table error (nro_error int, f_turno timestamp, nro_consultorio int, dni_medique int, nro_paciente int, operacion char(12), f_error timestamp, motivo varchar(64));
+		create table error (nro_error serial, f_turno timestamp, nro_consultorio int, dni_medique int, nro_paciente int, operacion char(12), f_error timestamp, motivo varchar(64));
 		create table cobertura (dni_medique int, nro_obra_social int, monto_paciente decimal(12,2), monto_obra_social decimal(12,2));
 		create table obra_social (nro_obra_social int, nombre text, contacto_nombre text, contacto_apellido text, contacto_telefono char(12), contacto_email text);
 		create table liquidacion_cabecera (nro_liquidacion int, nro_obra_social int, desde date, hasta date, total decimal(15,2));
@@ -571,14 +571,14 @@ func sp_generarTurnos() {
 				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
 								
 				while (extract(month from _fecha))::int = _mes loop
-					if extract(dow from _fecha)::int = _agenda.dia then
+					if extract(isodow from _fecha)::int = _agenda.dia then
 						fecha_completa = _fecha + _agenda.hora_desde;
 				
 						while fecha_completa::time < _agenda.hora_hasta loop
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
 							from agenda
-							where agenda.dni_medique = _agenda.dni_medique;
+							where agenda.dni_medique = _agenda.dni_medique and extract(isodow from fecha_completa) = agenda.dia;
 							
 							fecha_completa = fecha_completa + _agenda.duracion_turno;
 
@@ -650,7 +650,7 @@ func sp_reservarTurno() {
 			-- verificar si el medique atiende esa obra social
 			case
 				when condicion then
-					select * from cobertura p, obra_social o where c.dni_medique = _dni_medique and c.nro_obra_social = paciente_datos.nro_obra_social into aux;
+					select * from cobertura c, obra_social o where c.dni_medique = _dni_medique and c.nro_obra_social = paciente_datos.nro_obra_social into aux;
 					
 					if not found then
 						insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -686,13 +686,12 @@ func sp_reservarTurno() {
 			update turno
 			set
 			nro_paciente = _nro_paciente,
-			nro_obra_social_consulta = paciente_obrasocial,
+			nro_obra_social_consulta = paciente_datos.nro_obra_social,
 			estado = 'Reservado',
-			f_reserva = datetime
+			f_reserva = now()
 			where
 			dni_medique = _dni_medique
-			and fecha = _fecha_turno
-			and hora = _hora_turno
+			and fecha = _fecha_completa
 			and estado = 'Disponible';
 			
 			return true;
