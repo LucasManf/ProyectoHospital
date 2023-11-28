@@ -3,7 +3,9 @@ package main
 import (
 	"encoding/json"
     "fmt"
+    "bufio"
     "time"
+    "os"
     bolt "go.etcd.io/bbolt"
     "strconv"
 	"log"
@@ -78,7 +80,16 @@ func main() {
 				fmt.Print("Ingrese el DNI del medique: ")
 				fmt.Scanf("%d", &dni_medique)
 				fmt.Print("Ingresa una fecha y hora para el turno (formato: yyyy-mm-dd HH:MM:SS): ")
-				fmt.Scanf("%s", &fecha_turno)	
+				
+				reader := bufio.NewReader(os.Stdin)
+				linea, err := reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error al leer la entrada: ", err)
+					return
+				}	
+				
+				fecha_turno = linea[:len(linea)-1]
+	
 				
 				t, err := time.Parse("2006-01-02 15:04:05", fecha_turno)
 				if err != nil {
@@ -97,9 +108,28 @@ func main() {
 				fmt.Print("Ingrese el DNI del medique: ")
 				fmt.Scanf("%d", &dni_medique)
 				fmt.Print("Ingrese la fecha de inicio para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
-				fmt.Scanf("%s", &f_desde)
+				
+				reader := bufio.NewReader(os.Stdin)
+				linea, err := reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error al leer la entrada: ", err)
+					return
+				}	
+				
+				f_desde = linea[:len(linea)-1]
+
+				
 				fmt.Printf("Ingrese la fecha final para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
-				fmt.Scanf("%s", &f_hasta)
+				
+				reader = bufio.NewReader(os.Stdin)
+				linea, err = reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error al leer la entrada: ", err)
+					return
+				}	
+				
+				f_hasta = linea[:len(linea)-1]
+
 						
 				td, err := time.Parse("2006-01-02 15:04:05", f_desde)
 				if err != nil {
@@ -134,9 +164,28 @@ func main() {
 				fmt.Print("Ingrese el numero de obra social: ")
 				fmt.Scanf("%d", &nro_obra_social)				
 				fmt.Print("Ingrese la fecha de inicio para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
-				fmt.Scanf("%s", &f_desde)
+				
+				reader := bufio.NewReader(os.Stdin)
+				linea, err := reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error al leer la entrada: ", err)
+					return
+				}	
+				
+				f_desde = linea[:len(linea)-1]
+
+				
 				fmt.Printf("Ingrese la fecha final para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
-				fmt.Scanf("%s", &f_hasta)
+				
+				reader = bufio.NewReader(os.Stdin)
+				linea, err = reader.ReadString('\n')
+				if err != nil {
+					fmt.Println("Error al leer la entrada: ", err)
+					return
+				}	
+				
+				f_hasta = linea[:len(linea)-1]
+
 						
 				td, err := time.Parse("2006-01-02 15:04:05", f_desde)
 				if err != nil {
