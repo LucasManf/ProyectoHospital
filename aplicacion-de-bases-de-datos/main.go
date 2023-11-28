@@ -680,7 +680,6 @@ func sp_cancelarTurno() {
 			reprog record;
 			reprog2 record;
 			cantidad_turnos_cancelados int;
-			cantidad_turnos_cancelados2 int;
 			resultado int;
 		
 		begin
@@ -692,7 +691,7 @@ func sp_cancelarTurno() {
 			
 			if found then
 				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.nombre, reprog.apellido, reprog.telefono, reprog.email, aux.nombre, aux.apellido, 'pendiente');
-				get diagnosis cantidad_turnos_cancelados = ROW_COUNT;
+
 				update turno
 				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			end if;
@@ -702,15 +701,16 @@ func sp_cancelarTurno() {
 			
 			if found then
 				update turno
-				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
-				cantidad_turnos_cancelados2 = ROW_COUNT;
+				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='disponible';
+
 			end if;
 			
-			resultado = cantidad_de_turnos_cancelados + cantidad_de_turnos_cancelados2;
+			resultado = 1; --despues ver lo del row_count para contar la cantidad de turnos cancelados
 			
 			return resultado;
 		end;
 		$$ language plpgsql;
+
 
 	`)
 }
