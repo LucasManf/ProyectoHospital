@@ -720,31 +720,31 @@ func sp_atencionTurno() {
 			turno_atendido record;
 			
 		begin
-			select t.nro_turno from turno t into turno_atendido where t.nro_turno = _nro_turno;
+			select t.nro_turno from turno t where t.nro_turno = _nro_turno into turno_atendido;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'atencion de turnos', now(), 'nro de turno no valido');
+				values (now(), null, null, null, 'atencion', now(), 'nro de turno no valido');
 				raise notice 'nro de turno no valido';
 				return false;
 			end if;
 			
 			
-			select t.estado from turno t into turno_atendido where t.nro_turno = _nro_turno and t.estado = 'reservado';
+			select t.estado from turno t where t.nro_turno = _nro_turno and t.estado = 'reservado' into turno_atendido;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no reservado');
+				values (now(), null, null, null, 'atencion', now(), 'turno no reservado');
 				raise notice 'turno no reservado';
 				return false;
 			end if;
 			
 			
-			select t.fecha from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date; --tengo que separar la fecha del timestamp t.fecha para compararlo con current_date?
+			select t.fecha from turno t where t.nro_turno = _nro_turno and t.fecha::date = current_date into turno_atendido; --tengo que separar la fecha del timestamp t.fecha para compararlo con current_date?
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'atencion de turnos', now(), 'turno no corresponde a la fecha del dia');
+				values (now(), null, null, null, 'atencion', now(), 'turno no corresponde a la fecha del dia');
 				raise notice 'turno no corresponde a la fecha del dia';
 				return false;
 			end if;
@@ -756,6 +756,7 @@ func sp_atencionTurno() {
 			
 		end;
 		$$ language plpgsql;
+
 
 	`)
 }
