@@ -610,6 +610,12 @@ func sp_reservarTurno() {
 						raise notice 'obra social no atendida por el medique';
 						return false;
 					end if;
+					
+					select c.monto_paciente, c.monto_obra_social from medique m, cobertura c, paciente p where p.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique and _dni_medique = m.dni_medique and _nro_paciente = p.nro_paciente into datos_ob;
+				
+				else
+					select m.monto_consulta_privada from medique m, paciente p where _dni_medique = m.dni_medique into datos_ob;
+					
 			end case;
 			
 			-- verificar si el turno esta disponible
@@ -634,7 +640,6 @@ func sp_reservarTurno() {
 				return false;
 			end if;
 			
-			select m.monto_consulta_privada, c.monto_paciente, c.monto_obra_social from medique m, cobertura c, paciente p where p.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique and _dni_medique = m.dni_medique and _nro_paciente = p.nro_paciente into datos_ob;
 			
 			-- realizar la reserva del turno
 			if condicion then
@@ -653,7 +658,6 @@ func sp_reservarTurno() {
 				update turno
 				set
 				nro_paciente = _nro_paciente,
-				nro_obra_social_consulta = null,
 				estado = 'reservado',
 				f_reserva = now(),
 				monto_paciente = datos_ob.monto_consulta_privada
@@ -892,7 +896,7 @@ func sp_liquidacionObrasSociales() {
 
 		update liquidacion_cabecera
 		set total = total_liquidacion
-		where nro_liquidacion = _nro_liquidacion;
+		where nro_liquidacion = _nro_liquidacion and nro_obra_social = _nro_obra_social;
 
 	end;
 	$$ language plpgsql;
