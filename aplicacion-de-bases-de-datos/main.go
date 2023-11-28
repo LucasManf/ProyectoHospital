@@ -676,6 +676,7 @@ func sp_cancelarTurno() {
 	_, err = db.Exec(`
 		create or replace function cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp) returns int as $$
 		declare
+			aux record;
 			reprog record;
 			reprog2 record;
 			cantidad_turnos_cancelados int;
@@ -684,23 +685,25 @@ func sp_cancelarTurno() {
 		
 		begin
 			
-			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique m into reprog 
+			select m.apellido, m.nombre from medique m into aux;
+			
+			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email from turno t, paciente p, medique m into reprog 
 			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado' ;
 			
 			if found then
-				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono, reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente');
-				cantidad_turnos_cancelados := row_count;
+				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.nombre, reprog.apellido, reprog.telefono, reprog.email, aux.nombre, aux.apellido, 'pendiente');
+				get diagnosis cantidad_turnos_cancelados = ROW_COUNT;
 				update turno
 				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			end if;
 			
-			select t.nro_turno, m.nombre, m.apellido from turno, t medique m into reprog2
+			select t.nro_turno, m.nombre, m.apellido from turno t, medique m into reprog2
 			where m.dni_medique = t.dni_medique and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'disponible' ;
 			
 			if found then
 				update turno
 				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
-				cantidad_turnos_cancelados2 := row_count;
+				cantidad_turnos_cancelados2 = ROW_COUNT;
 			end if;
 			
 			resultado = cantidad_de_turnos_cancelados + cantidad_de_turnos_cancelados2;
@@ -708,6 +711,7 @@ func sp_cancelarTurno() {
 			return resultado;
 		end;
 		$$ language plpgsql;
+
 	`)
 }
 
