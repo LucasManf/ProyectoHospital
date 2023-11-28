@@ -697,7 +697,6 @@ func sp_reservarTurno() {
 		end;
 		$$ language plpgsql;
 
-
 	`)
 }
 
