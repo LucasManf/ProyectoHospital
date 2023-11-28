@@ -566,6 +566,7 @@ func sp_reservarTurno() {
 			condicion boolean;
 			fecha_completa timestamp;
 			aux record;
+			datos_ob record;
 
 		begin
 			
@@ -633,18 +634,32 @@ func sp_reservarTurno() {
 				return false;
 			end if;
 			
-			-- realizar la reserva del turno
-			update turno
-			set
-			nro_paciente = _nro_paciente,
-			nro_obra_social_consulta = paciente_datos.nro_obra_social,
-			estado = 'reservado',
-			f_reserva = now()
-			where
-			turno.dni_medique = _dni_medique
-			and turno.fecha = fecha_completa;
+			select m.monto_consulta_privada, c.monto_paciente, c.monto_obra_social from medique m, cobertura c, paciente p where p.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique and _dni_medique = m.dni_medique and _nro_paciente = p.nro_paciente into datos_ob;
 			
-			-- hacer un if que, si el paciente tiene obra social, agregue un monto_obra_social en la tabla turno, y si no tiene, que agregue un monto_paciente en la tabla turno.
+			-- realizar la reserva del turno
+			if condicion then
+				update turno
+				set
+				nro_paciente = _nro_paciente,
+				nro_obra_social_consulta = paciente_datos.nro_obra_social,
+				estado = 'reservado',
+				f_reserva = now(),
+				monto_paciente = datos_ob.monto_paciente,
+				monto_obra_social = datos_ob.monto_obra_social
+				where
+				turno.dni_medique = _dni_medique
+				and turno.fecha = fecha_completa;
+			else
+				update turno
+				set
+				nro_paciente = _nro_paciente,
+				nro_obra_social_consulta = null,
+				estado = 'reservado',
+				f_reserva = now(),
+				monto_paciente = datos_ob.monto_consulta_privada
+				where
+				turno.dni_medique = _dni_medique
+				and turno.fecha = fecha_completa;			
 			
 			return true;
 		end;
