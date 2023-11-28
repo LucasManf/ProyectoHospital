@@ -571,14 +571,14 @@ func sp_generarTurnos() {
 				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
 								
 				while (extract(month from _fecha))::int = _mes loop
-					if extract(dow from _fecha)::int = _agenda.dia then
+					if extract(isodow from _fecha)::int = _agenda.dia then
 						fecha_completa = _fecha + _agenda.hora_desde;
 				
 						while fecha_completa::time < _agenda.hora_hasta loop
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
 							from agenda
-							where agenda.dni_medique = _agenda.dni_medique;
+							where agenda.dni_medique = _agenda.dni_medique and agenda.dia = extract(isodow from fecha_completa);
 							
 							fecha_completa = fecha_completa + _agenda.duracion_turno;
 
@@ -982,6 +982,10 @@ func generarTurnos(_anio int, _mes int) {
 	_, err = db.Query(`
 		select generar_turnos($1,$2);
 	`, _anio, _mes)
+	
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 	
 func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
@@ -994,6 +998,9 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.T
 	_, err = db.Query(`
 		select reservar_turno($1, $2, $3);
 	`, _nro_paciente, _dni_medique, _fecha_hora_turno)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
@@ -1006,6 +1013,9 @@ func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
 	_, err = db.Query(`
 		select cancelacion_turnos($1, $2, $3);
 	`, _dni_medique, _fdesde, _fhasta)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 func atencionTurnos(_nro_turno int) {
 	db, err := dbConnection()
@@ -1017,6 +1027,9 @@ func atencionTurnos(_nro_turno int) {
 	_, err = db.Query(`
 		select atencion_turnos($1);
 	`, _nro_turno)	
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 	
 func emailRecordatorio() {
@@ -1041,6 +1054,9 @@ func emailPerdidaTurno() {
 	_, err = db.Query(`
 		select email_perdida_turno();
 	`)	
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _hasta time.Time)	{
@@ -1052,7 +1068,11 @@ func generarLiquidacionObrasSociales(_nro_obra_social int, _desde time.Time, _ha
 
 	_, err = db.Query(`
 		select generar_liquidacion_obras_sociales($1, $2, $3);
-	`, _nro_obra_social, _desde, _hasta)	
+	`, _nro_obra_social, _desde, _hasta)
+	
+	if err != nil {
+		log.Fatal(err)
+	}	
 	
 }
 
