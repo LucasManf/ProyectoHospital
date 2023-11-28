@@ -263,7 +263,7 @@ func createTables() {
 		create table obra_social (nro_obra_social int, nombre text, contacto_nombre text, contacto_apellido text, contacto_telefono char(12), contacto_email text);
 		create table liquidacion_cabecera (nro_liquidacion int, nro_obra_social int, desde date, hasta date, total decimal(15,2));
 		create table liquidacion_detalle (nro_liquidacion int, nro_linea int, f_atencion date, nro_afiliade int, dni_paciente int, nombre_paciente text, apellido_paciente text, dni_medique int, nombre_medique text, apellido_medique text, especialidad varchar(64), monto decimal(12,2));
-		create table envio_email (nro_email int, f_generacion timestamp, email_paciente text, asunto text, cuerpo text, f_envio timestamp, estado char(10));
+		create table envio_email (nro_email serial, f_generacion timestamp, email_paciente text, asunto text, cuerpo text, f_envio timestamp, estado char(10));
 		create table solicitud_reservas (nro_orden int, nro_paciente int, dni_medique int, fecha date, hora time);
 		`)
 		
@@ -619,22 +619,22 @@ func sp_reservarTurno() {
 		begin
 			
 			-- verificar su el dni del medique existe
-			select m.dni_medique from medique m where m.dni_medique = _dni_medique;
+			select m.dni_medique from medique m where m.dni_medique = _dni_medique into aux;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'dni de medique no valido');
+				values (now(), null, null, null, 'reserva', now(), 'dni de medique no valido');
 				raise notice 'dni de medique no valido';
 				return false;
 			end if;
 			
 
 			-- verificar si el numero de historia clinica existe
-			select p.nro_paciente from paciente p where p.nro_paciente = _nro_paciente;
+			select p.nro_paciente from paciente p where p.nro_paciente = _nro_paciente into aux;
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'nro de historia clinica no valido');
+				values (now(), null, null, null, 'reserva', now(), 'nro de historia clinica no valido');
 				raise notice 'nro de historia clinica no valido';
 				return false;
 			end if;
@@ -654,7 +654,7 @@ func sp_reservarTurno() {
 					
 					if not found then
 						insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-						values (now(), null, null, null, 'reserva de turnos', now(), 'obra social no atendida por el medique');
+						values (now(), null, null, null, 'reserva', now(), 'obra social no atendida por el medique');
 						raise notice 'obra social no atendida por el medique';
 						return false;
 					end if;
@@ -667,7 +667,7 @@ func sp_reservarTurno() {
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'turno inexistente o no disponible');
+				values (now(), null, null, null, 'reserva', now(), 'turno inexistente o no disponible');
 				raise notice 'turno inexistente o no disponible';
 				return false;
 			end if;
@@ -677,7 +677,7 @@ func sp_reservarTurno() {
 
 			if cantidad_turnos_reservados >= 5 then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
-				values (now(), null, null, null, 'reserva de turnos', now(), 'Supera el lìmite de reserva de turnos');
+				values (now(), null, null, null, 'reserva', now(), 'Supera el lìmite de reserva de turnos');
 				raise notice 'Supera el lìmite de reserva de turnos';
 				return false;
 			end if;
@@ -690,9 +690,8 @@ func sp_reservarTurno() {
 			estado = 'Reservado',
 			f_reserva = now()
 			where
-			dni_medique = _dni_medique
-			and fecha = _fecha_completa
-			and estado = 'Disponible';
+			turno.dni_medique = _dni_medique
+			and turno.fecha = fecha_completa;
 			
 			return true;
 		end;
@@ -843,7 +842,7 @@ func sp_emailPerdidaSP() {
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
 		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
-	commit;
+
 	end;
 	$$ language plpgsql;
 		
@@ -936,8 +935,9 @@ create or replace function email_reserva() returns trigger as $$
 		cuerpo_email := 'se reservo su turno para el dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
-
+		values (now(), datos_turno.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+		
+		return new;
 	end;
 	$$ language plpgsql;
 	
@@ -958,8 +958,9 @@ create or replace function email_cancelacion() returns trigger as $$
 		cuerpo_email := 'se cancelo su turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
-
+		values (now(), datos_turno.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+		
+		return new;
 	end;
 	$$ language plpgsql;
 	
