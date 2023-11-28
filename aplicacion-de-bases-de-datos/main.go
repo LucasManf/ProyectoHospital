@@ -779,11 +779,13 @@ func sp_emailRecordatorioSP() {
 			
 		begin
 			fecha_email := current_date + interval '2 days';
-			select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email and t.estado = 'reservado' into datos_turno;
-			cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
+			select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha::date = fecha_email and t.estado = 'reservado' into datos_turno;
 			
+			if found then
+			cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 			insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
 			values (now(), datos_turno.email, 'Recordatorio de turno', cuerpo_email, now(), 'enviado');
+			end if;
 
 		end;
 		$$ language plpgsql;
@@ -811,9 +813,7 @@ func sp_emailPerdidaSP() {
 		cuerpo_email := 'Perdiste tu turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-		values (now(), datos_turno.email, 'Reserva de turno', cuerpo_email, now(), 'enviado');
-
-		--???pongo un update turno para cambiar el estado del turno o no hace falta????
+		values (now(), datos_turno.email, 'Pérdida de turno reservado', cuerpo_email, now(), 'enviado');
 
 	end;
 	$$ language plpgsql;
