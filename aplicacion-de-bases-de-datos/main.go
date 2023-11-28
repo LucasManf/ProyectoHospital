@@ -677,22 +677,35 @@ func sp_cancelarTurno() {
 		create or replace function cancelacion_turnos(_dni_medique int, _fdesde timestamp, _fhasta timestamp) returns int as $$
 		declare
 			reprog record;
+			reprog2 record;
 			cantidad_turnos_cancelados int;
+			cantidad_turnos_cancelados2 int;
+			resultado int;
 		
 		begin
+			
 			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email, m.nombre, m.apellido from turno t, paciente p, medique m into reprog 
-			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado';
-
-			update turno
-			set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
+			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado' ;
 			
 			if found then
 				insert into reprogramacion (nro_turno, nombre_paciente, apellido_paciente, telefono_paciente, email_paciente, nombre_medique, apellido_medique, estado) values (reprog.nro_turno, reprog.p.nombre, reprog.p.apellido, reprog.p.telefono, reprog.p.email, reprog.m.nombre, reprog.m.apellido, 'pendiente');
-				cantidad_turnos_cancelados := ROW_COUNT;
+				cantidad_turnos_cancelados := row_count;
+				update turno
+				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
 			end if;
-		
-			return cantidad_turnos_cancelados;
-
+			
+			select t.nro_turno, m.nombre, m.apellido from turno, t medique m into reprog2
+			where m.dni_medique = t.dni_medique and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'disponible' ;
+			
+			if found then
+				update turno
+				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
+				cantidad_turnos_cancelados2 := row_count;
+			end if;
+			
+			resultado = cantidad_de_turnos_cancelados + cantidad_de_turnos_cancelados2;
+			
+			return resultado;
 		end;
 		$$ language plpgsql;
 	`)
