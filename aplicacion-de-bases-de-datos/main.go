@@ -728,7 +728,7 @@ func sp_cancelarTurno() {
 			end if;
 		
 			return cantidad_turnos_cancelados;
-		commit;
+
 		end;
 		$$ language plpgsql;
 	`)
@@ -770,7 +770,7 @@ func sp_atencionTurno() {
 			end if;
 			
 			
-			select t.fecha from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date;
+			select t.fecha from turno t into turno_atendido where t.nro_turno = _nro_turno and t.fecha = current_date; --tengo que separar la fecha del timestamp t.fecha para compararlo con current_date?
 			
 			if not found then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
@@ -783,7 +783,7 @@ func sp_atencionTurno() {
 			set estado = 'atendido' where nro_turno = _nro_turno;
 			
 			return true;
-		commit;				
+			
 		end;
 		$$ language plpgsql;
 
@@ -807,13 +807,13 @@ func sp_emailRecordatorioSP() {
 			fecha_email date := current_date = interval '2 days';
 			
 		begin
-			select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email into datos_turno;
+			select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha = fecha_email and t.estado = 'reservado' into datos_turno;
 			cuerpo_email := 'Recordatorio de turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 			
 			insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-			values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+			values (now(), datos_turno.email, 'Reserva de turno', cuerpo_email, now(), 'enviado');
 
-		commit;
+
 		end;
 		$$ language plpgsql;
 		
@@ -836,11 +836,13 @@ func sp_emailPerdidaSP() {
 		cuerpo_email text;
 		
 	begin
-		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha <= now() into datos_turno;
+		select p.email, m.nombre, m.apellido, t.fecha from paciente p, turno t, medique m where t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.fecha <= now() and estado = 'reservado' into datos_turno;
 		cuerpo_email := 'Perdiste tu turno del dia: ' || datos_turno.fecha ||', con el Dr. ' || datos_turno.nombre || ' ' || datos_turno.apellido;
 		
 		insert into envio_email (f_generacion, email_paciente, asunto, cuerpo, f_envio, estado)
-		values (now(), datos_paciente.email, 'Reserva de turno', cuerpo_email, null, 'pendiente');
+		values (now(), datos_turno.email, 'Reserva de turno', cuerpo_email, now(), 'enviado');
+
+		--???pongo un update turno para cambiar el estado del turno o no hace falta????
 
 	end;
 	$$ language plpgsql;
@@ -902,7 +904,7 @@ func sp_liquidacionObrasSociales() {
 		update liquidacion_cabecera
 		set total = total_liquidacion
 		where nro_liquidacion = nro_liquidacion;
-	commit;
+
 	end;
 	$$ language plpgsql;
 
