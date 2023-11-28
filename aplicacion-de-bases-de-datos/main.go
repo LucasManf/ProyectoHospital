@@ -641,7 +641,7 @@ func sp_reservarTurno() {
 			
 			-- verificar si el paciente tiene una obra social y obtener la obra social
 			condicion := false;
-			select p.nro_obra_social from paciente p, obra_social o where p.nro_obra_social = o.nro_obra_social into paciente_datos;
+			select p.nro_obra_social from paciente p, obra_social o where p.nro_obra_social = o.nro_obra_social and p.nro_paciente = _nro_paciente into paciente_datos;
 			
 			if found then
 				condicion := true;
