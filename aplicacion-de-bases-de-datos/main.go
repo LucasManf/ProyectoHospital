@@ -3,9 +3,7 @@ package main
 import (
 	"encoding/json"
     "fmt"
-    "bufio"
     "time"
-    "os"
     bolt "go.etcd.io/bbolt"
     "strconv"
 	"log"
@@ -74,30 +72,30 @@ func main() {
 					nro_paciente int
 					dni_medique int
 					fecha_turno string
+					hora_turno string
 				)
 				fmt.Print("Ingrese el numero de historia medica del paciente: ")
 				fmt.Scanf("%d", &nro_paciente)
 				fmt.Print("Ingrese el DNI del medique: ")
 				fmt.Scanf("%d", &dni_medique)
-				fmt.Print("Ingresa una fecha y hora para el turno (formato: yyyy-mm-dd HH:MM:SS): ")
+				fmt.Print("Ingresa una fecha para el turno (formato: yyyy-mm-dd): ")
+				fmt.Scan(&fecha_turno)
+				fmt.Print("Ingresa una hora para el turno (formato: HH:MM:SS): ")
+				fmt.Scan(&hora_turno)
 				
-				reader := bufio.NewReader(os.Stdin)
-				linea, err := reader.ReadString('\n')
+				fecha, err := time.Parse("2006-01-02", fecha_turno)
 				if err != nil {
-					fmt.Println("Error al leer la entrada: ", err)
+					fmt.Println("Error al parsear la fecha:", err)
 					return
-				}	
+				}		
 				
-				fecha_turno = linea[:len(linea)-1]
-	
-				
-				t, err := time.Parse("2006-01-02 15:04:05", fecha_turno)
+				hora, err := time.Parse("15:04:05", hora_turno)
 				if err != nil {
-					fmt.Println("Error al parsear la fecha y hora:", err)
+					fmt.Println("Error al parsear la fecha:", err)
 					return
-				}			
-				
-			    reservarTurno(nro_paciente, dni_medique, t)
+				}
+					
+			    reservarTurno(nro_paciente, dni_medique, fecha, hora)
 			case opcion == 11:
 				var (
 					dni_medique int
@@ -107,37 +105,18 @@ func main() {
 				
 				fmt.Print("Ingrese el DNI del medique: ")
 				fmt.Scanf("%d", &dni_medique)
-				fmt.Print("Ingrese la fecha de inicio para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
-				
-				reader := bufio.NewReader(os.Stdin)
-				linea, err := reader.ReadString('\n')
-				if err != nil {
-					fmt.Println("Error al leer la entrada: ", err)
-					return
-				}	
-				
-				f_desde = linea[:len(linea)-1]
-
-				
-				fmt.Printf("Ingrese la fecha final para cancelar (formato: yyyy-mm-dd HH:MM:SS): ")
-				
-				reader = bufio.NewReader(os.Stdin)
-				linea, err = reader.ReadString('\n')
-				if err != nil {
-					fmt.Println("Error al leer la entrada: ", err)
-					return
-				}	
-				
-				f_hasta = linea[:len(linea)-1]
-
+				fmt.Print("Ingrese la fecha de inicio para cancelar (formato: yyyy-mm-dd): ")
+				fmt.Scan(&f_desde)				
+				fmt.Printf("Ingrese la fecha final para cancelar (formato: yyyy-mm-dd): ")
+				fmt.Scan(&f_hasta)
 						
-				td, err := time.Parse("2006-01-02 15:04:05", f_desde)
+				td, err := time.Parse("2006-01-02", f_desde)
 				if err != nil {
 					fmt.Println("Error al parsear la fecha y hora:", err)
 					return
 				}			
 					
-				th, err := time.Parse("2006-01-02 15:04:05", f_hasta)
+				th, err := time.Parse("2006-01-02", f_hasta)
 				if err != nil {
 					fmt.Println("Error al parsear la fecha y hora:", err)
 					return
@@ -163,40 +142,23 @@ func main() {
 				
 				fmt.Print("Ingrese el numero de obra social: ")
 				fmt.Scanf("%d", &nro_obra_social)				
-				fmt.Print("Ingrese la fecha de inicio para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
-				
-				reader := bufio.NewReader(os.Stdin)
-				linea, err := reader.ReadString('\n')
-				if err != nil {
-					fmt.Println("Error al leer la entrada: ", err)
-					return
-				}	
-				
-				f_desde = linea[:len(linea)-1]
-
-				
-				fmt.Printf("Ingrese la fecha final para liquidar (formato: yyyy-mm-dd HH:MM:SS): ")
-				
-				reader = bufio.NewReader(os.Stdin)
-				linea, err = reader.ReadString('\n')
-				if err != nil {
-					fmt.Println("Error al leer la entrada: ", err)
-					return
-				}	
-				
-				f_hasta = linea[:len(linea)-1]
-
+				fmt.Print("Ingrese la fecha de inicio para liquidar (formato: yyyy-mm-dd): ")
+				fmt.Scan(&f_desde)				
+				fmt.Printf("Ingrese la fecha final para liquidar (formato: yyyy-mm-dd): ")
+				fmt.Scan(&f_hasta)
 						
-				td, err := time.Parse("2006-01-02 15:04:05", f_desde)
+				td, err := time.Parse("2006-01-02", f_desde)
 				if err != nil {
 					fmt.Println("Error al parsear la fecha y hora:", err)
 					return
 				}			
-				th, err := time.Parse("2006-01-02 15:04:05", f_hasta)
+					
+				th, err := time.Parse("2006-01-02", f_hasta)
 				if err != nil {
 					fmt.Println("Error al parsear la fecha y hora:", err)
 					return
-				}
+				}		
+				
 			    generarLiquidacionObrasSociales(nro_obra_social, td, th)                 	
 			case opcion == 16:
 				fmt.Println("Adios!")
@@ -687,7 +649,7 @@ func sp_reservarTurno() {
 			set
 			nro_paciente = _nro_paciente,
 			nro_obra_social_consulta = paciente_datos.nro_obra_social,
-			estado = 'Reservado',
+			estado = 'reservado',
 			f_reserva = now()
 			where
 			turno.dni_medique = _dni_medique
@@ -978,6 +940,7 @@ create or replace function email_cancelacion() returns trigger as $$
 	}
 }
 
+//Ejecuciones de sp
 func generarTurnos(_anio int, _mes int) {
 	db, err := dbConnection()
 	if err != nil {
@@ -990,7 +953,7 @@ func generarTurnos(_anio int, _mes int) {
 	`, _anio, _mes)
 }
 	
-func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.Time)  {
+func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_turno time.Time, _hora_turno time.Time)  {
 	db, err := dbConnection()
 	if err != nil {
 		log.Fatal(err)
@@ -998,8 +961,8 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_hora_turno time.T
 	defer db.Close()
 
 	_, err = db.Query(`
-		select reservar_turno($1, $2, $3);
-	`, _nro_paciente, _dni_medique, _fecha_hora_turno)
+		select reservar_turno($1, $2, $3,$4);
+	`, _nro_paciente, _dni_medique, _fecha_turno, _hora_turno)
 }
 	
 func cancelacionTurnos(_dni_medique int, _fdesde time.Time, _fhasta time.Time)	{
