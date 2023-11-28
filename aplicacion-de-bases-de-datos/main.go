@@ -693,6 +693,8 @@ func sp_reservarTurno() {
 			turno.dni_medique = _dni_medique
 			and turno.fecha = fecha_completa;
 			
+			-- hacer un if que, si el paciente tiene obra social, agregue un monto_obra_social en la tabla turno, y si no tiene, que agregue un monto_paciente en la tabla turno.
+			
 			return true;
 		end;
 		$$ language plpgsql;
@@ -781,8 +783,6 @@ func sp_atencionTurno() {
 			
 			update turno
 			set estado = 'atendido' where nro_turno = _nro_turno;
-			
-			-- hacer un if que, si el paciente tiene obra social, agregue un monto_obra_social en la tabla turno, y si no tiene, que agregue un monto_paciente en la tabla turno.
 			
 			return true;
 			
