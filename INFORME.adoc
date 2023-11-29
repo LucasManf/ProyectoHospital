@@ -10,21 +10,11 @@ v1, {docdate}. Docente Hernan Rondelli (COM-08)
 
 El trabajo practico como reemplazo del segundo parcial de la materia "Base de datos II"
 
-consiste en la creacion de una base de datos relacional sql (utilizando la libreria pq) 
+consiste en la creacion de una base de datos relacional sql y otra no relacional en json (con la libreria de boltdb); 
 
-y otra no relacional en json (con la libreria de boltdb); sobre un hospital.
+sobre un hospital. Ambas seran ejecutadas mediante un programa en lenguaje go. La base de datos sql debera contar con distintos 
 
-Ambas seran ejecutadas mediante un programa en lenguaje go. La base de datos sql debera contar con distintos 
-
-Stored Procedures y triggers como: 
-
- -Stored Procedures y triggers: 
-*Generacion de turnos disponibles. 
-*Reservas de turnos. 
-*Cancelacion de turnos.
-*Atencion de turnos.
-*Liquidacion para obras sociales.
-*Envio de mails a pacientes.
+caracteristicas: 
 
  -Tablas a crear para la db SQL:
 *Pacientes.
@@ -40,13 +30,19 @@ Stored Procedures y triggers como:
 *Liquidaciones detalle.
 *Envios email.
 
+ -Stored Procedures y triggers: 
+*Generacion de turnos disponibles. 
+*Reservas de turnos. 
+*Cancelacion de turnos.
+*Atencion de turnos.
+*Liquidacion para obras sociales.
+*Envio de mails a pacientes.
+
 == Descripción
 
 Dividimos las tareas entre los integrantes del grupo para poder entender  
 
-cada uno, los distintos tipos de escritura, haciendo que uno se ocupe 
-
-del json, otro del asciidoc y entre todos pusimos de nuestra parte para completar el archivo de 
+cada uno, los distintos tipos de lenguajes y entre todos pusimos de nuestra parte para completar el archivo de 
 
 go (postgres), y en especial la implementacion de las ditintas librerias nuevas trabajadas.
  
@@ -61,10 +57,19 @@ A traves de este trabajo nos encontramos con distintos obstaculos.
 
 Muchos de estos se debieron a la poca experiencia en los lenguajes 
 
-que debian de ser utilizados tanto en json y go. 
+que debian de ser utilizados tanto en json y go.
 
 
-Uno de los mayores obstaculos que tuvimos fueron los Stored procedures 
+El lenguaje go resulto nos ser tan complejo, pero en si tuvimos que comprender conceptos que tal vez
+
+no habiamos trabajado en las otras materias cursadas, como el manejo de las fechas y la conexion a 
+
+postgres. Con esto ultimo lo que mas tuvimos que investigar era como pasar los parametros del go a las 
+
+procedure dentro del postgres y como mostrar los resultados de los mismos.
+
+
+Otro de los mayores obstaculos que tuvimos fueron los Stored procedures 
 
 los cuales nos dieron muchos problemas en cuanto a su logica y su complicada sintaxis. 
 
@@ -73,7 +78,7 @@ Consideramos que algunos de esos eran demasiado complejos para nuestros conocimi
 termiamos atrasandonos demasiado.
 
 
-Al final hicimos todo lo que pudimos, creando la base de datos con todas sus tablas y sus atributos; 
+Al final pudimos completar el tp, creando la base de datos con todas sus tablas y sus atributos; 
 
 sus Stored procedures con las caracteristicas pedidas; todo esto hecho y testado en postgres sql y luego pasado a go.
 
@@ -122,12 +127,12 @@ func crearDB() {
 }
 ----
 
-.Descubrimos esta manera de pasar un string de una fecha pasada por el usuario a un time.Time
+.Descubrimos esta manera de pasar un string de una fecha (pasada por el usuario) a un time.Time
 [source, go]
 ----
-t, err := time.Parse("2006-01-02 15:04:05", fecha_turno)
+t, err := time.Parse("2006-01-02", fecha_turno)
 if err != nil {
-	fmt.Println("Error al parsear la fecha y hora:", err)
+	fmt.Println("Error al parsear la fecha:", err)
 	return
 }		
 ----
@@ -165,5 +170,4 @@ Tambien aprendimos como es la experiencia de la creacion de una base de datos ta
 
 por lo menos comparandola con lo que habiamos trabajado previamente en la cursada, y lograr que esta pueda 
 
-pasar varias de las pruebas exigidas por este TP.
-
+pasar las pruebas exigidas por este TP.
