@@ -18,7 +18,7 @@ Ambas seran ejecutadas mediante un programa en lenguaje go. La base de datos sql
 
 Stored Procedures y triggers como: 
 
--Stored Procedures y triggers: 
+ -Stored Procedures y triggers: 
 *Generacion de turnos disponibles. 
 *Reservas de turnos. 
 *Cancelacion de turnos.
@@ -26,7 +26,7 @@ Stored Procedures y triggers como:
 *Liquidacion para obras sociales.
 *Envio de mails a pacientes.
 
--Tablas a crear para la db SQL:
+ -Tablas a crear para la db SQL:
 *Pacientes.
 *Mediques.
 *Consultorios.
