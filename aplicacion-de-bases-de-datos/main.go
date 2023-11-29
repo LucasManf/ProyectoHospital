@@ -636,7 +636,7 @@ func sp_reservarTurno() {
 			end if;
 			
 			-- verificar si el paciente ha superado el limite de 5 turnos en estado reservado
-			select count(*) from turno where nro_paciente = _nro_paciente and estado = 'Reservado' into cantidad_turnos_reservados ;
+			select count(*) from turno where nro_paciente = _nro_paciente and estado = 'reservado' into cantidad_turnos_reservados ;
 
 			if cantidad_turnos_reservados >= 5 then
 				insert into error (f_turno, nro_consultorio, dni_medique, nro_paciente, operacion, f_error, motivo)
