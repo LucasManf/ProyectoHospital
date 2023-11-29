@@ -160,7 +160,7 @@ func main() {
 
 
 func dbConnection()(*sql.DB, error){		//conexion a la base de datos
-    db, err := sql.Open("postgres", "user=postgres host=localhost dbname=hospital sslmode=disable")
+    db, err := sql.Open("postgres", "user=lucifer host=localhost dbname=hospital sslmode=disable")
 	if err != nil{
        log.Fatal(err)
 	}
@@ -168,7 +168,7 @@ func dbConnection()(*sql.DB, error){		//conexion a la base de datos
 }
 
 func crearDB() {		//crear base de datos
-	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=postgres sslmode=disable")
+	db, err := sql.Open("postgres", "user=lucifer host=localhost dbname=postgres sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
