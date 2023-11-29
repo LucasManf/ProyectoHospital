@@ -693,6 +693,7 @@ func sp_cancelarTurno() {
 			resultado int;
 		
 		begin
+			cantidad_turnos_cancelados := 0;
 			
 			select m.apellido, m.nombre from medique m where m.dni_medique = _dni_medique into aux;
 			
@@ -704,6 +705,7 @@ func sp_cancelarTurno() {
 
 				update turno
 				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='reservado';
+				get diagnostics cantidad_turnos_cancelados = row_count;
 			end if;
 			
 			select t.nro_turno, m.nombre, m.apellido from turno t, medique m into reprog2
@@ -712,10 +714,10 @@ func sp_cancelarTurno() {
 			if found then
 				update turno
 				set estado = 'cancelado' where dni_medique = _dni_medique and fecha >= _fdesde and fecha <= _fhasta and estado ='disponible';
-
+				get diagnostics resultado = row_count;
 			end if;
 			
-			resultado = 1; --despues ver lo del row_count para contar la cantidad de turnos cancelados
+			resultado = resultado + cantidad_turnos_cancelados;
 			
 			return resultado;
 		end;
