@@ -694,7 +694,7 @@ func sp_cancelarTurno() {
 		
 		begin
 			
-			select m.apellido, m.nombre from medique m into aux;
+			select m.apellido, m.nombre from medique m where m.dni_medique = _dni_medique into aux;
 			
 			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email from turno t, paciente p, medique m into reprog 
 			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado' ;
