@@ -183,6 +183,12 @@ func crearDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	_, err = db.Exec("alter database hospital set timezone to 'America/Argentina/Buenos_Aires'")
+	if err != nil {
+		log.Fatal(err)
+	}
+	
 	fmt.Println("Base de datos creada exitosamente.")
 }
 
