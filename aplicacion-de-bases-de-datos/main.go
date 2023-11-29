@@ -933,9 +933,10 @@ create or replace function email_reserva() returns trigger as $$
 	end;
 	$$ language plpgsql;
 	
-	create trigger trigger_email_reserva
-	after update on turno
-	for each row
+	create or replace trigger trigger_email_reserva
+	after update on turno 
+	for each row 
+	when (new.estado = 'reservado')
 	execute function email_reserva();
 	
 ------------------------------------------------------------------------
@@ -956,7 +957,7 @@ create or replace function email_cancelacion() returns trigger as $$
 	end;
 	$$ language plpgsql;
 	
-	create trigger trigger_email_cancelacion
+	create or replace trigger trigger_email_cancelacion
 	after insert on reprogramacion
 	for each row
 	execute function email_cancelacion();
