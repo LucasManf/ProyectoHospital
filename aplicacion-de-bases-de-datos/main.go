@@ -611,7 +611,7 @@ func sp_reservarTurno() {
 						return false;
 					end if;
 					
-					select c.monto_paciente, c.monto_obra_social from medique m, cobertura c, paciente p where p.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique and _dni_medique = m.dni_medique and _nro_paciente = p.nro_paciente into datos_ob;
+					select c.monto_paciente, c.monto_obra_social, p.nro_afiliade from medique m, cobertura c, paciente p where p.nro_obra_social = c.nro_obra_social and m.dni_medique = c.dni_medique and _dni_medique = m.dni_medique and _nro_paciente = p.nro_paciente into datos_ob;
 				
 				else
 					select m.monto_consulta_privada from medique m, paciente p where _dni_medique = m.dni_medique into datos_ob;
@@ -647,6 +647,7 @@ func sp_reservarTurno() {
 				set
 				nro_paciente = _nro_paciente,
 				nro_obra_social_consulta = paciente_datos.nro_obra_social,
+				nro_afiliade_consulta = datos_ob.nro_afiliade,
 				estado = 'reservado',
 				f_reserva = now(),
 				monto_paciente = datos_ob.monto_paciente,
@@ -855,40 +856,29 @@ func sp_liquidacionObrasSociales() {
 	declare 
 		total_liquidacion float;
 		_nro_liquidacion int;
+		aux record;
 	begin
 		total_liquidacion := 0.0;
-	
+		
+		
+		
 		insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
 		values(_nro_obra_social, _desde, _hasta, total_liquidacion)
 		returning nro_liquidacion into _nro_liquidacion;
 
 		update turno
 		set estado = 'liquidado'
-		where nro_obra_social_consulta = _nro_obra_social
+		where nro_obra_social_consulta = _nro_obra_social and estado = 'atendido'
 		and fecha between _desde and _hasta;
 
 		insert into liquidacion_detalle (nro_liquidacion, f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, nombre_medique, apellido_medique, especialidad, monto)
 		select
-		_nro_liquidacion,
-		t.fecha,
-		t.nro_afiliade_consulta,
-		p.dni_paciente,
-		p.nombre,
-		p.apellido,
-		t.dni_medique,
-		m.nombre,
-		m.apellido,
-		m.especialidad,
-		t.monto_obra_social
-		from
-		turno t,
-		paciente p,
-		medique m
-		where
-		t.nro_obra_social_consulta = _nro_obra_social 
-		and t.nro_paciente = p.nro_paciente
-		and t.dni_medique = m.dni_medique
-		and t.fecha between _desde and _hasta;
+		_nro_liquidacion, t.fecha, t.nro_afiliade_consulta, p.dni_paciente, p.nombre, p.apellido, t.dni_medique, m.nombre, m.apellido, m.especialidad, t.monto_obra_social
+		from turno t, paciente p, medique m
+		where t.nro_obra_social_consulta = _nro_obra_social  and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.estado = 'liquidado' and t.fecha between _desde and _hasta;
+
+		select t.estado from turno t, paciente p, medique m
+		where t.nro_obra_social_consulta = _nro_obra_social  and t.nro_paciente = p.nro_paciente and t.dni_medique = m.dni_medique and t.estado = 'liquidado' and t.fecha between _desde and _hasta into aux;
 
 		select sum(monto) into total_liquidacion
 		from liquidacion_detalle
@@ -896,7 +886,7 @@ func sp_liquidacionObrasSociales() {
 
 		update liquidacion_cabecera
 		set total = total_liquidacion
-		where nro_liquidacion = _nro_liquidacion and nro_obra_social = _nro_obra_social;
+		where nro_liquidacion = _nro_liquidacion and nro_obra_social = _nro_obra_social and estado = 'liquidado';
 
 	end;
 	$$ language plpgsql;
