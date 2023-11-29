@@ -886,7 +886,7 @@ func sp_liquidacionObrasSociales() {
 
 		update liquidacion_cabecera
 		set total = total_liquidacion
-		where nro_liquidacion = _nro_liquidacion and nro_obra_social = _nro_obra_social and estado = 'liquidado';
+		where nro_liquidacion = _nro_liquidacion and nro_obra_social = _nro_obra_social and aux.estado = 'liquidado';
 
 	end;
 	$$ language plpgsql;
