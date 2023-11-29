@@ -72,13 +72,13 @@ func main() {
 				fmt.Print("Ingresa una hora para el turno (formato: HH:MM): ")
 				fmt.Scan(&hora_turno)
 				
-				fecha, err := time.Parse("2006-01-02", fecha_turno)
+				fecha, err := time.Parse("2006-01-02", fecha_turno)	//convierte el string ingresado a time.Time
 				if err != nil {
 					fmt.Println("Error al parsear la fecha: ", err)
 					return
 				}		
 				
-				hora, err := time.Parse("15:04", hora_turno)
+				hora, err := time.Parse("15:04", hora_turno)		
 				if err != nil {
 					fmt.Println("Error al parsear la hora: ", err)
 					return
@@ -159,7 +159,7 @@ func main() {
 }
 
 
-func dbConnection()(*sql.DB, error){
+func dbConnection()(*sql.DB, error){		//conexion a la base de datos
     db, err := sql.Open("postgres", "user=postgres host=localhost dbname=hospital sslmode=disable")
 	if err != nil{
        log.Fatal(err)
@@ -167,14 +167,13 @@ func dbConnection()(*sql.DB, error){
 	return db, nil
 }
 
-// crear base de datos
-func crearDB() {
+func crearDB() {		//crear base de datos
 	db, err := sql.Open("postgres", "user=postgres host=localhost dbname=postgres sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	_, err = db.Exec("drop database if exists hospital")
+	_, err = db.Exec("drop database if exists hospital")	
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -184,7 +183,7 @@ func crearDB() {
 		log.Fatal(err)
 	}
 	
-	_, err = db.Exec("alter database hospital set timezone to 'America/Argentina/Buenos_Aires'")
+	_, err = db.Exec("alter database hospital set timezone to 'America/Argentina/Buenos_Aires'")	//cambia la zona horaria a bsas
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -192,8 +191,8 @@ func crearDB() {
 	fmt.Println("Base de datos creada exitosamente.")
 }
 
-// crear tablas
-func createTables() {
+
+func createTables() {  	//crear tablas
 	db, err := dbConnection()
 
 	_, err = db.Exec("drop schema public cascade")
@@ -232,13 +231,13 @@ func createTables() {
 	fmt.Println("Tablas creadas exitosamente.")
 }
 
-func createPK() {
+func createPK() {		//se crean la primary keys
 	db, err := dbConnection()
 	if err != nil{
 		log.Fatal(err)
 	}
 	defer db.Close()
-	
+
 	_, err = db.Exec (`alter table paciente add constraint paciente_pk primary key(nro_paciente);
 		alter table medique add constraint medique_pk primary key (dni_medique);
 		alter table consultorio add constraint consultorio_pk primary key (nro_consultorio);
@@ -258,7 +257,7 @@ func createPK() {
 	fmt.Println("Pk creadas exitosamente.")
 }
 
-func createFK() {
+func createFK() {		//se crean la foreign keys
 		db, err := dbConnection()
 	if err != nil{
 		log.Fatal(err)
@@ -290,7 +289,7 @@ func createFK() {
 }
 
 
-func cargarTablas() {
+func cargarTablas() {		//se cargan las tablas
 	db, err := dbConnection()
 	if err != nil{
 		log.Fatal(err)
@@ -422,7 +421,7 @@ func cargarTablas() {
 	fmt.Println("Tablas cargadas")
 }
 	
-func crearSP() {
+func crearSP() { 		
     sp_generarTurnos()
 	sp_reservarTurno()
 	sp_cancelarTurno()
@@ -508,8 +507,8 @@ func sp_generarTurnos() {
 	defer db.Close()
 
 	_, err = db.Exec(`
-		create or replace function generar_turnos(_anio int, _mes int) returns bool as $$
-		declare
+		create or replace function generar_turnos(_anio int, _mes int) returns bool as $$	
+		declare	
 				aux record;
 				_fecha date;
 				_agenda record;
@@ -524,25 +523,25 @@ func sp_generarTurnos() {
 				return false;
 			end if;
 			
-			for _agenda in select * from agenda a loop
-				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');
+			for _agenda in select * from agenda a loop		
+				_fecha = to_date(_anio || '-' || _mes || '-' || '01', 'yyyy-mm-dd');  --recorre la tabla agenda y concatena el anio mes y dia en formato "yyyy-mm-dd"   
 								
-				while (extract(month from _fecha))::int = _mes loop
-					if extract(isodow from _fecha)::int = _agenda.dia then
-						fecha_completa = _fecha + _agenda.hora_desde;
-				
-						while fecha_completa::time < _agenda.hora_hasta loop
+				while (extract(month from _fecha))::int = _mes loop				--comapara el mes que esta en fecha con el mes ingresado
+					if extract(isodow from _fecha)::int = _agenda.dia then		--compara el "dow" de la fecha con la columna dia de la tbla agenda
+						fecha_completa = _fecha + _agenda.hora_desde; 			--concatena _fecha de tipo date, con hora_desde de tipo time y lo mete dentro de la varianble fecha_completa de tipo timestamp
+					
+						while fecha_completa::time < _agenda.hora_hasta loop	--compara la hora de fecha_completa con hora_hasta, y dice que el loop termina cuando la hora de fecha_completa es mayor que hora_hasta
 							insert into turno (fecha, nro_consultorio, dni_medique, estado)
 							select fecha_completa, _agenda.nro_consultorio, _agenda.dni_medique, 'disponible'
 							from agenda
 							where agenda.dni_medique = _agenda.dni_medique and extract(isodow from fecha_completa) = agenda.dia;
 							
-							fecha_completa = fecha_completa + _agenda.duracion_turno;
+							fecha_completa = fecha_completa + _agenda.duracion_turno;	--agrega la duracion de _agenda.duracion_turno a fecha_completa para indicar el comienzo del siguiente turno
 
 						end loop;
 					end if;			
 					
-					_fecha = _fecha + 1;
+					_fecha = _fecha + 1;	--le agrega un dia a la fecha
 				end loop;
 			end loop;
 			raise notice 'Los turnos fueron generados';
@@ -647,7 +646,7 @@ func sp_reservarTurno() {
 			end if;
 			
 			
-			-- realizar la reserva del turno
+			-- realizar la reserva del turno para los pacientes que tienen obra social y los que no.
 			if condicion then
 				update turno
 				set
@@ -701,7 +700,8 @@ func sp_cancelarTurno() {
 		begin
 			cantidad_turnos_cancelados := 0;
 			
-			select m.apellido, m.nombre from medique m where m.dni_medique = _dni_medique into aux;
+			--cancelar turnos con el estado reservado
+			select m.apellido, m.nombre from medique m where m.dni_medique = _dni_medique into aux;	 	
 			
 			select t.nro_turno, p.nombre, p.apellido, p.telefono, p.email from turno t, paciente p, medique m into reprog 
 			where m.dni_medique = t.dni_medique and p.nro_paciente = t.nro_paciente and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'reservado' ;
@@ -714,6 +714,7 @@ func sp_cancelarTurno() {
 				get diagnostics cantidad_turnos_cancelados = row_count;
 			end if;
 			
+			--cancelar turnos con el estado disponible 
 			select t.nro_turno, m.nombre, m.apellido from turno t, medique m into reprog2
 			where m.dni_medique = t.dni_medique and t.dni_medique = _dni_medique and t.fecha >= _fdesde and t.fecha <= _fhasta and estado = 'disponible' ;
 			
@@ -723,6 +724,7 @@ func sp_cancelarTurno() {
 				get diagnostics resultado = row_count;
 			end if;
 			
+			--cantidad de turnos cancelados
 			resultado = resultado + cantidad_turnos_cancelados;
 			
 			return resultado;
@@ -749,6 +751,8 @@ func sp_atencionTurno() {
 			turno_atendido record;
 			
 		begin
+		
+			--verificar si existe el numero de turno
 			select t.nro_turno from turno t where t.nro_turno = _nro_turno into turno_atendido;
 			
 			if not found then
@@ -758,7 +762,7 @@ func sp_atencionTurno() {
 				return false;
 			end if;
 			
-			
+			--verificar que el turno esta reservado
 			select t.estado from turno t where t.nro_turno = _nro_turno and t.estado = 'reservado' into turno_atendido;
 			
 			if not found then
@@ -768,7 +772,7 @@ func sp_atencionTurno() {
 				return false;
 			end if;
 			
-			
+			--verificar que el turno corresponde con la fecha actual
 			select t.fecha from turno t where t.nro_turno = _nro_turno and t.fecha::date = current_date into turno_atendido; --tengo que separar la fecha del timestamp t.fecha para compararlo con current_date?
 			
 			if not found then
@@ -868,17 +872,18 @@ func sp_liquidacionObrasSociales() {
 	begin
 		total_liquidacion := 0.0;
 		
-		
-		
+		--inserto en la tabla liquidacion_cabecera los datos ingresados y el total 	
 		insert into liquidacion_cabecera (nro_obra_social, desde, hasta, total)
 		values(_nro_obra_social, _desde, _hasta, total_liquidacion)
 		returning nro_liquidacion into _nro_liquidacion;
 
+		--cambio el estado del turno de atendido a liquidado
 		update turno
 		set estado = 'liquidado'
 		where nro_obra_social_consulta = _nro_obra_social and estado = 'atendido'
 		and fecha between _desde and _hasta;
-
+		
+		--inserto en la tabla liquidacion_detalle los datos del turno liquidado  
 		insert into liquidacion_detalle (nro_liquidacion, f_atencion, nro_afiliade, dni_paciente, nombre_paciente, apellido_paciente, dni_medique, nombre_medique, apellido_medique, especialidad, monto)
 		select
 		_nro_liquidacion, t.fecha, t.nro_afiliade_consulta, p.dni_paciente, p.nombre, p.apellido, t.dni_medique, m.nombre, m.apellido, m.especialidad, t.monto_obra_social
@@ -936,7 +941,7 @@ create or replace function email_reserva() returns trigger as $$
 	create or replace trigger trigger_email_reserva
 	after update on turno 
 	for each row 
-	when (new.estado = 'reservado')
+	when (new.estado = 'reservado')	  --el trigger se ejecuta cuando el estado del turno cambia a reservado
 	execute function email_reserva();
 	
 ------------------------------------------------------------------------
@@ -978,9 +983,9 @@ func generarTurnos(_anio int, _mes int) {
 
 	var resultado bool
 	
-	err = db.QueryRow(`
+	err = db.QueryRow(`		
 		select generar_turnos($1,$2);
-	`, _anio, _mes).Scan(&resultado)
+	`, _anio, _mes).Scan(&resultado)	//escanemaos el resultado de la funcion dentro de la variable resultado
 	if err != nil {
 		log.Fatal(err)
 	}	
@@ -998,8 +1003,8 @@ func reservarTurno(_nro_paciente int, _dni_medique int, _fecha_turno time.Time, 
 	var resultado bool
 
 	err = db.QueryRow(`
-		select reservar_turno($1, $2, $3,$4);
-	`, _nro_paciente, _dni_medique, _fecha_turno, _hora_turno).Scan(&resultado)
+		select reservar_turno($1, $2, $3,$4);	
+	`, _nro_paciente, _dni_medique, _fecha_turno, _hora_turno).Scan(&resultado)	
 	
 	if err != nil {
 		log.Fatal(err)
