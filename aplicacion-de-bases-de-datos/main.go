@@ -160,35 +160,62 @@ func main() {
 
 
 func dbConnection()(*sql.DB, error){		//conexion a la base de datos
-    db, err := sql.Open("postgres", "user=lucifer host=localhost dbname=hospital sslmode=disable")
+    db, err := sql.Open("postgres", "host=localhost user=admin password=1234 dbname=hospital sslmode=disable")
 	if err != nil{
        log.Fatal(err)
 	}
 	return db, nil
 }
 
-func crearDB() {		//crear base de datos
-	db, err := sql.Open("postgres", "user=lucifer host=localhost dbname=postgres sslmode=disable")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-	_, err = db.Exec("drop database if exists hospital")	
-	if err != nil {
-		log.Fatal(err)
-	}
-	
-	_, err = db.Exec("create database hospital")
-	if err != nil {
-		log.Fatal(err)
-	}
-	
-	_, err = db.Exec("alter database hospital set timezone to 'America/Argentina/Buenos_Aires'")	//cambia la zona horaria a bsas
-	if err != nil {
-		log.Fatal(err)
-	}
-	
-	fmt.Println("Base de datos creada exitosamente.")
+func crearDB() {
+    // Conectar a la base de datos 'postgres' en lugar de 'hospital'
+    db, err := sql.Open("postgres", "host=localhost user=admin password=1234 dbname=postgres sslmode=disable")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer db.Close()
+    
+    // Terminar todas las conexiones activas a la base de datos 'hospital'
+    _, err = db.Exec(`
+        SELECT pg_terminate_backend(pg_stat_activity.pid)
+        FROM pg_stat_activity
+        WHERE pg_stat_activity.datname = 'hospital'
+          AND pid <> pg_backend_pid()
+    `)
+    if err != nil {
+        log.Printf("Advertencia al terminar conexiones: %v", err)
+    }
+    
+    // Ahora sí eliminar la base de datos
+    _, err = db.Exec("DROP DATABASE IF EXISTS hospital")
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Crear la base de datos
+    _, err = db.Exec("CREATE DATABASE hospital")
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Println("Base de datos creada exitosamente.")
+    
+    // Cerrar la conexión a 'postgres'
+    db.Close()
+    
+    // Ahora conectar a 'hospital' para cambiar el timezone
+    dbHospital, err := sql.Open("postgres", "host=localhost user=admin password=1234 dbname=hospital sslmode=disable")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer dbHospital.Close()
+    
+    _, err = dbHospital.Exec("ALTER DATABASE hospital SET timezone TO 'America/Argentina/Buenos_Aires'")
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Println("Zona horaria configurada exitosamente.")
 }
 
 
