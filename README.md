@@ -1,68 +1,166 @@
-# Administración de Turnos Médicos - Proyecto Final
+# Medical Appointments Management System
 
-Este proyecto tiene como objetivo la gestión y administración de turnos médicos utilizando una base de datos relacional y NoSQL, con una aplicación de línea de comandos (CLI) escrita en Go. El sistema permite gestionar la información de los pacientes, médicos, consultorios, obras sociales, turnos, reprogramaciones, y liquidaciones mensuales. 
+A simple medical appointment management system built with Go, PostgreSQL, and BoltDB. This CLI application allows managing patients, doctors, appointments, scheduling, and monthly billing for medical practices.
 
-## Tecnologías Utilizadas
+## Technologies Used
 
-- **Lenguajes:**
-  - **SQL (PostgreSQL)**: Para el manejo de la base de datos relacional, creación de tablas, relaciones, y procedimientos almacenados.
-  - **Go**: Para la implementación de una CLI que interactúa con la base de datos, gestionando los turnos, reservas, cancelaciones, entre otros.
-  
-- **Base de Datos:**
-  - **PostgreSQL**: Para la implementación de la base de datos relacional.
-  - **BoltDB (NoSQL)**: Para almacenar los datos de pacientes, médicos, consultorios, obras sociales y turnos en un formato no relacional basado en JSON.
+- **Go**: Command-line application for interacting with the database
+- **PostgreSQL**: Relational database for storing medical appointments data
+- **BoltDB (NoSQL)**: Alternative storage system using JSON-based key-value pairs
 
-## Funcionalidades
+## Prerequisites
 
-1. **Gestión de Pacientes:**
-   - Alta de pacientes con datos como número de historia clínica, nombre, apellido, fecha de nacimiento, obra social, contacto, etc.
-   
-2. **Gestión de Médicos:**
-   - Alta de médicos con datos como DNI, especialidad, monto de consulta privada, y contacto.
-   
-3. **Agenda de Médicos:**
-   - Registro de la disponibilidad de los médicos en días específicos y horarios, incluyendo la duración de los turnos.
-   
-4. **Reserva de Turnos:**
-   - Los pacientes pueden reservar turnos con médicos disponibles. El sistema valida varios aspectos antes de confirmar la reserva, como la existencia del médico, la validez del número de historia clínica, y el cumplimiento de los turnos disponibles.
-   
-5. **Cancelación y Reprogramación de Turnos:**
-   - Permite cancelar turnos y registrarlos en una tabla de reprogramación para que el centro de atención pueda contactar a los pacientes afectados.
-   
-6. **Atención de Turnos:**
-   - Marca los turnos como atendidos, asegurándose de que el turno esté reservado y sea del día correspondiente.
-   
-7. **Liquidación para Obras Sociales:**
-   - Genera una liquidación mensual por obra social, incluyendo el monto a abonar por los pacientes y el detalle de las atenciones realizadas.
-   
-8. **Envío Automático de Correos Electrónicos:**
-   - Genera correos electrónicos automáticos para notificar a los pacientes sobre:
-     - Reserva de turno.
-     - Cancelación de turno.
-     - Recordatorio de turno (para los turnos próximos).
-     - Pérdida de turno reservado (para turnos no atendidos).
-   
-9. **Modelo NoSQL:**
-   - Además de la base de datos relacional, los datos son almacenados en una base de datos NoSQL (BoltDB), permitiendo una comparación entre el modelo relacional y no relacional.
-   
-10. **CLI en Go:**
-    - La aplicación CLI permite interactuar con las funcionalidades del sistema de manera sencilla, con comandos específicos para la reserva, cancelación, y manejo de turnos.
+Before running this project, make sure you have the following installed:
 
-## Estructura del Proyecto
+- **Go** (version 1.16 or higher) - [Download Go](https://golang.org/dl/)
+- **Docker** and **Docker Compose** - [Download Docker](https://www.docker.com/get-started)
 
-- **`/cmd`**: Contiene el código principal de la aplicación CLI.
-- **`/db`**: Archivos relacionados con la base de datos, como scripts de creación de tablas, relaciones y procedimientos almacenados.
-- **`/models`**: Definiciones de estructuras de datos, tanto para la base de datos relacional como NoSQL.
-- **`/scripts`**: Scripts adicionales para pruebas o configuraciones.
-- **`/tests`**: Archivos de prueba para validar el funcionamiento de la aplicación.
+## Project Structure
 
-## Procedimientos Almacenados y Triggers
+```
+root
+│
+├── hospital.sql
+├── docker-compose.yml
+│
+├── aplicacion-de-bases-de-datos/
+│   └── main.go
+│
+└── hospital-json/
+    ├── app-boltdb.go
+    └── hospital.db
+```
 
-El proyecto incluye varios procedimientos almacenados y triggers para la automatización de la gestión de turnos:
+## Installation & Setup
 
-- **Generación de turnos disponibles**: Automatiza la creación de turnos para todos los médicos en el mes y año especificado.
-- **Reserva de turno**: Permite la validación de reservas y la actualización de estados.
-- **Cancelación de turnos**: Cancela turnos y los registra para reprogramación.
-- **Atención de turnos**: Marca los turnos como atendidos y actualiza el estado.
-- **Liquidación de obras sociales**: Genera y marca como liquidados los turnos atendidos.
-- **Envío de correos**: Genera correos automáticos sobre las distintas acciones que ocurren en el sistema.
+### 1. Clone the Repository
+
+```bash
+git clone <your-repository-url>
+cd <project-directory>
+```
+
+### 2. Start PostgreSQL with Docker
+
+Start the PostgreSQL database using Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+This will start a PostgreSQL container on port `5432` with the following credentials:
+- **User**: `admin`
+- **Password**: `1234`
+- **Database**: `postgres` (default)
+
+To verify the container is running:
+
+```bash
+docker-compose ps
+```
+
+To stop the database:
+
+```bash
+docker-compose down
+```
+
+To stop and remove all data:
+
+```bash
+docker-compose down -v
+```
+
+### 3. Run the Application
+
+Navigate to the application directory and run:
+
+```bash
+cd aplicacion-de-bases-de-datos
+go run main.go
+```
+
+## Features
+
+### 1. Patient Management
+- Register patients with medical history number, name, date of birth, health insurance, and contact information
+
+### 2. Doctor Management
+- Register doctors with ID, specialty, consultation fees, and availability
+
+### 3. Doctor Schedule Management
+- Set up doctor availability for specific days and time slots, including appointment duration
+
+### 4. Appointment Booking
+- Patients can book appointments with available doctors
+- System validates doctor availability, patient credentials, and scheduling conflicts
+
+### 5. Appointment Cancellation & Rescheduling
+- Cancel appointments and register them for rescheduling
+- Notification system for affected patients
+
+### 6. Appointment Attendance
+- Mark appointments as attended
+- Validates that appointments are reserved and scheduled for the current day
+
+### 7. Health Insurance Billing
+- Generate monthly billing statements for health insurance companies
+- Detailed reports of services provided and amounts due
+
+### 8. Automated Email Notifications
+The system generates automatic email notifications for:
+- Appointment confirmation
+- Appointment cancellation
+- Appointment reminders (for upcoming appointments)
+- Missed appointment notifications
+
+### 9. NoSQL Model
+- Alternative storage using BoltDB for comparison between relational and non-relational approaches
+
+### 10. CLI Interface
+- Simple command-line interface for all system operations
+
+## Database Features
+
+The project includes stored procedures and triggers for:
+- Automatic generation of available appointment slots
+- Appointment reservation validation
+- Appointment cancellation and rescheduling
+- Attendance tracking
+- Health insurance billing
+- Automated email generation
+
+## Docker Compose Configuration
+
+The `docker-compose.yml` file is configured as follows:
+
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+```
+
+## Usage
+
+1. Start Docker container: `docker-compose up -d`
+2. Run the application: `go run main.go`
+3. Follow the CLI prompts to manage appointments
+4. Stop the database when done: `docker-compose down`
+
+## Notes
+
+- The application will create the `hospital` database automatically on first run
+- The timezone is set to `America/Argentina/Buenos_Aires` by default
+- Data persists in Docker volumes between container restarts
